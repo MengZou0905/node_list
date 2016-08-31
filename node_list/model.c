@@ -124,6 +124,7 @@ typedef struct node
 	struct nodeRec *lastRec;
 	struct node *son;
 	struct node *bro;
+	struct node *par;
 	leaf *sonleaf;
 }node;
 node *root = NULL;
@@ -140,14 +141,32 @@ typedef struct leaf
 	int LRD;
 	int leafRecNum;
 	leafRec *firstNotFre;
+	node *par;
+	node *bro;
 }leaf;
 void BuildTree()
 {
+	node *nodeCur = NULL;
 	node *nodePre = NULL;
 	node *nodeLeftBro = NULL;
+	leaf *leafCur = NULL;
 	nodeRec *newRec = NULL;
+	leafRec * recCur = NULL; 
+	leafRec * recPre = NULL;
+
+	root = (node *)malloc(sizeof(node));
+	root->bro = NULL;
+	root->firstRec = NULL;
+	root->lastRec = NULL;
+	root->nodeId = -1;
+	root->par = NULL;
+	root->son = NULL;
+	root->sonleaf = NULL;
+
 	for (set *setCur = setHead; setCur != NULL; setCur = setCur->next){
-		node *nodeCur = root;
+		nodePre = root;
+		nodeCur = NULL;
+		leafCur = NULL;
 		for (int i = 0; i < setCur->freSep; i++){
 			if (nodeCur == NULL){
 				nodeCur = (node *)malloc(sizeof(node));
@@ -159,14 +178,10 @@ void BuildTree()
 				nodeCur->nodeId = setCur->element[i];
 				nodeCur->son = NULL;
 				nodeCur->sonleaf = NULL;
-				if (root == NULL){
-					root = nodeCur;
-					nodePre = nodeCur;
-				}
-				else{
-					nodePre->son = nodeCur;
-					nodePre = nodeCur;
-				}
+				nodeCur->par = nodePre;
+				nodePre->son = nodeCur;
+				nodePre = nodeCur;
+				
 			}
 			else{
 				for (; nodeCur != NULL && nodeCur->nodeId != setCur->element[i]; nodeLeftBro = nodeCur, nodeCur = nodeCur->bro);
@@ -178,6 +193,7 @@ void BuildTree()
 					nodeCur->firstRec->next = NULL;
 					nodeCur->lastRec = nodeCur->firstRec;
 					nodeCur->nodeId = setCur->element[i];
+					nodeCur->par = nodePre;
 					nodeCur->son = NULL;
 					nodeCur->sonleaf = NULL;
 					nodeLeftBro->bro = nodeCur;
@@ -193,14 +209,87 @@ void BuildTree()
 			}
 			if (i < setCur->freSep - 1)
 				nodeCur = nodePre->son;
-			else
-				nodeCur = nodePre->sonleaf;
 		}
 		for (int i = setCur->freSep; i < setCur->eleNum; i++){
-			//TODO
+			leafCur = nodePre->sonleaf;
+			if (leafCur == NULL){
+				leafCur = (leaf *)malloc(sizeof(leaf));
+				leafCur->bro = nodePre->son;
+				leafCur->firstNotFre = (leafRec *)malloc(sizeof(leafRec));
+				leafCur->firstNotFre->firstRec = (nodeRec *)malloc(sizeof(nodeRec));
+				leafCur->firstNotFre->firstRec->setId = setCur->id;
+				leafCur->firstNotFre->firstRec->next = NULL;
+				leafCur->firstNotFre->lastRec = leafCur->firstNotFre->firstRec;
+				leafCur->firstNotFre->leafId = setCur->element[i];
+				leafCur->firstNotFre->next = NULL;
+				leafCur->leafRecNum = 1;
+				leafCur->par = nodePre;
+				nodeCur->sonleaf = leafCur;
+			}
+			else{
+				recCur = leafCur->firstNotFre;
+				recPre = NULL;
+				for (; recCur != NULL && recCur->leafId != setCur->element[i]; recPre = recCur, recCur = recCur->next);
+				if (recCur == NULL){
+					recCur = (leafRec *)malloc(sizeof(leafRec));
+					recCur->firstRec = (nodeRec *)malloc(sizeof(nodeRec));
+					recCur->firstRec->setId = setCur->id;
+					recCur->firstRec->next = NULL;
+					recCur->lastRec = recCur->firstRec;
+					recCur->leafId = setCur->element[i];
+					recCur->next = NULL;
+					recPre->next = recCur;
+					
+				}
+				else{
+					newRec = (nodeRec *)malloc(sizeof(nodeRec));
+					newRec->setId = setCur->id;
+					newRec->next = NULL;
+					recCur->lastRec->next = newRec;
+					recCur->lastRec = newRec;
+				}
+			}
 		}
 	}
 }
+void CheckTree()
+{
+	
+}
+int DLR(int index, node *nodePre, node *nodeCur, leaf *leafCur)
+{
+	if (nodePre == root && nodeCur == NULL && leafCur == NULL)
+		return 0;
+	else{
+		if (nodeCur != NULL && leafCur == NULL){
+			nodeCur->DLR = index;
+			if (nodeCur->sonleaf != NULL)
+				DLR(index + 1, nodeCur, NULL, nodeCur->sonleaf);
+			else
+				if (nodeCur->son != NULL)
+					DLR(index + 1, nodeCur, nodeCur->son, NULL);
+		}
+		else{
+			if (nodeCur == NULL && leafCur != NULL){
+				leafCur->DLR = index;
+				if (leafCur->bro != NULL)
+					DLR(index + 1, leafCur, leafCur->bro, NULL);
+				else
+					if (leafCur->bro == NULL)
+						DLR(index + 1, leafCur->par->par, leafCur->par->bro, NULL);
+			}
+			else
+				if (nodeCur == NULL && leafCur == NULL)
+					DLR(index, nodePre->par, nodePre->bro, NULL);
+		}
+	}
+}
+
+void LRD()
+{
+
+}
+
 int main()
 {
 	char *filePath = ".//data//mushroom.dat";
@@ -213,6 +302,7 @@ int main()
 	RearrangeData(totalNum,threshold);
 	CheckSet();
 	BuildTree();
+	CheckTree();
 	//DLR();
 	//LRD();
 	system("pause");
