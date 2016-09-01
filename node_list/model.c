@@ -252,10 +252,7 @@ void BuildTree()
 		}
 	}
 }
-void CheckTree()
-{
-	
-}
+
 int DLR(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 {
 	if (nodeCur == NULL && leafCur != NULL){
@@ -308,6 +305,20 @@ int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 	}
 }
 
+void CheckTree()
+{
+
+}
+
+void GenNodeList()
+{
+
+}
+
+void Query()
+{
+
+}
 int main()
 {
 	char *filePath = ".//data//mushroom.dat";
@@ -323,6 +334,10 @@ int main()
 	CheckTree();
 	DLR(0, NULL, root, NULL);
 	LRD(0, NULL, root, NULL);
+	//CheckTree();
+	//GenNodeList();
+	//Query();
+	
 	system("pause");
 	return 0;
 }
