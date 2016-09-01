@@ -258,36 +258,54 @@ void CheckTree()
 }
 int DLR(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 {
-	if (nodePre == root && nodeCur == NULL && leafCur == NULL)
-		return 0;
+	if (nodeCur == NULL && leafCur != NULL){
+		leafCur->DLR == index;
+		DLR(index + 1, nodePre, leafCur->bro, NULL);
+	}
 	else{
 		if (nodeCur != NULL && leafCur == NULL){
 			nodeCur->DLR = index;
 			if (nodeCur->sonleaf != NULL)
 				DLR(index + 1, nodeCur, NULL, nodeCur->sonleaf);
 			else
-				if (nodeCur->son != NULL)
-					DLR(index + 1, nodeCur, nodeCur->son, NULL);
+				DLR(index + 1, nodeCur, nodeCur->son, NULL);
 		}
 		else{
-			if (nodeCur == NULL && leafCur != NULL){
-				leafCur->DLR = index;
-				if (leafCur->bro != NULL)
-					DLR(index + 1, leafCur, leafCur->bro, NULL);
-				else
-					if (leafCur->bro == NULL)
-						DLR(index + 1, leafCur->par->par, leafCur->par->bro, NULL);
-			}
-			else
-				if (nodeCur == NULL && leafCur == NULL)
+			if (nodeCur == NULL && leafCur == NULL){
+				if (nodePre == root)
+					return 0;
+				else{
 					DLR(index, nodePre->par, nodePre->bro, NULL);
+				}
+			}
 		}
-	}
+	} 
 }
 
-void LRD()
+int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 {
-
+	int temp = 0;
+	if (leafCur != NULL && nodeCur == NULL){
+		leafCur->LRD = index;
+		LRD(index + 1, nodePre, leafCur->bro, NULL);
+	}
+	else{
+		if (leafCur == NULL && nodeCur != NULL){
+			if (nodeCur->sonleaf != NULL)
+				LRD(index, nodeCur, NULL, nodeCur->sonleaf);
+			else
+				LRD(index, nodeCur, nodeCur->son, NULL);
+		}
+		else{
+			if (leafCur == NULL && nodeCur == NULL){
+				nodePre->LRD == index;
+				if (nodePre == root)
+					return 0;
+				else
+					LRD(index + 1, nodePre->par, nodePre->bro, NULL);
+			}
+		}
+	}
 }
 
 int main()
@@ -303,8 +321,8 @@ int main()
 	CheckSet();
 	BuildTree();
 	CheckTree();
-	//DLR();
-	//LRD();
+	DLR(0, NULL, root, NULL);
+	LRD(0, NULL, root, NULL);
 	system("pause");
 	return 0;
 }
