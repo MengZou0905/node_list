@@ -2,13 +2,14 @@
 #include<map>
 #include<iostream>
 #include<fstream>
+#include<sstream>
 #include<string>
 using namespace std;
+
 
 void ReadData(string fileName)
 {
 	ifstream in(fileName);
-	int item;
 	/*
 	while (in >> item){
 	cout << item << endl;
@@ -16,7 +17,13 @@ void ReadData(string fileName)
 	*/
 	string line;
 	while (getline(in, line)){
-		cout << line << endl;
+		//cout << line << endl;
+		int data;
+		istringstream li(line);
+		cout << "line: ";
+		while (li >> data)
+			cout << data <<" ";
+		cout <<endl;
 	}
 	
 	
