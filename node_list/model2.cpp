@@ -36,7 +36,8 @@ int CountData()
 		for (int j = 0; j < Set[i].size(); j++)
 			itemCount[Set[i][j]] += 1;
 	for (int i = 0; i < 3000; i++)
-		total += itemCount[i];	
+		total += itemCount[i];
+	cout << "CountData Done--------" << endl;
 	return total;
 }
 
@@ -48,6 +49,7 @@ void RearrangeData()
 {
 	for (int i = 0; i < Set.size(); i++)
 		sort(Set[i].begin(), Set[i].end(), compare);
+	cout << "RearrangeData Done--------" << endl;
 	/*
 	for (int i = 0; i < Set.size(); i++){
 	cout << "after:";
@@ -143,20 +145,34 @@ void BuildTree(float fre, int total)
 						nodeCur->bro = nodeLeftBro;
 					}
 				}
-			}
-			
+			}	
 		}
 	}
+	cout << "BuildTree Done--------" << endl;
 }
 
 int DLR(int index, node *nodePre, node *nodeCur){
 	if (nodeCur != NULL && nodeCur->leaf == 1){
 		nodeCur->DLR == index;
+		//DEBUG
+		cout << index << ":";
+		for (auto elem : nodeCur->nodeRec){
+			cout << "(" << elem.first << ")";
+		}
+		cout << endl;
+		//DEBUG
 		DLR(index + 1, nodePre, nodeCur->bro);
 	}
 	else{
 		if (nodeCur != NULL && nodeCur->leaf == 0){
 			nodeCur->DLR = index;
+			//DEBUG
+			cout << index << ":";
+			for (auto elem : nodeCur->nodeRec){
+				cout << "(" << elem.first << ")";
+			}
+			cout << endl;
+			//DEBUG
 			if (nodeCur->son != NULL)
 				DLR(index + 1, nodeCur,nodeCur->son);
 		}
@@ -177,6 +193,13 @@ int LRD(int index, node *nodePre, node *nodeCur){
 	int temp = 0;
 	if (nodeCur != NULL && nodeCur->leaf == 1){
 		nodeCur->LRD = index;
+		//DEBUG
+		cout << index << ":";
+		for (auto elem : nodeCur->nodeRec){
+			cout << "(" << elem.first << ")";
+		}
+		cout << endl;
+		//DEBUG
 		LRD(index + 1, nodePre, nodeCur->bro);
 	}
 	else{
@@ -187,6 +210,13 @@ int LRD(int index, node *nodePre, node *nodeCur){
 		else{
 			if (nodeCur == NULL){
 				nodePre->LRD == index;
+				//DEBUG
+				cout << index << ":";
+				for (auto elem : nodePre->nodeRec){
+					cout << "(" << elem.first << ")";
+				}
+				cout << endl;
+				//DEBUG
 				if (nodePre == root)
 					return 0;
 				else
@@ -204,8 +234,8 @@ int main()
 	total = CountData();
 	RearrangeData();
 	BuildTree(fre, total);
-	//DLR();
-	//LRD();
+	DLR(0, NULL, root);
+	LRD(0, NULL, root);
 	//GenNodeList();
 	//Query();
 	system("pause");
