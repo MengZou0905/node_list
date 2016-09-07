@@ -59,6 +59,8 @@ void RearrangeData()
 }
 typedef struct node{
 	bool leaf;
+	int DLR;
+	int LRD;
 	map<int, vector<int>> nodeRec;
 	node *son;//如果有叶子节点，那么son（第一个孩子节点）一定指向叶子节点，叶子节点的bro指针再指向其他非叶节点。
 	node *par;
@@ -147,12 +149,51 @@ void BuildTree(float fre, int total)
 	}
 }
 
-void DLR(int index, node *nodePre, node *nodeCur){
+int DLR(int index, node *nodePre, node *nodeCur){
+	if (nodeCur != NULL && nodeCur->leaf == 1){
+		nodeCur->DLR == index;
+		DLR(index + 1, nodePre, nodeCur->bro);
+	}
+	else{
+		if (nodeCur != NULL && nodeCur->leaf == 0){
+			nodeCur->DLR = index;
+			if (nodeCur->son != NULL)
+				DLR(index + 1, nodeCur,nodeCur->son);
+		}
+		else{
+			if (nodeCur == NULL){
+				if (nodePre == root)
+					return 0;
+				else{
+					DLR(index, nodePre->par, nodePre->bro);
+				}
+			}
+		}
+	}
 	
 }
 
-void LRD(int index, node *nodePre, node *nodeCur){
-
+int LRD(int index, node *nodePre, node *nodeCur){
+	int temp = 0;
+	if (nodeCur != NULL && nodeCur->leaf == 1){
+		nodeCur->LRD = index;
+		LRD(index + 1, nodePre, nodeCur->bro);
+	}
+	else{
+		if (nodeCur != NULL && nodeCur->leaf == 0){
+			if (nodeCur->son != NULL)
+				LRD(index, nodeCur, nodeCur->son);
+		}
+		else{
+			if (nodeCur == NULL){
+				nodePre->LRD == index;
+				if (nodePre == root)
+					return 0;
+				else
+					LRD(index + 1, nodePre->par, nodePre->bro);
+			}
+		}
+	}
 }
 int main()
 {
