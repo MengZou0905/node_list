@@ -60,7 +60,7 @@ void RearrangeData()
 typedef struct node{
 	bool leaf;
 	map<int, vector<int>> nodeRec;
-	node *child;
+	node *son;//如果有叶子节点，那么son（第一个孩子节点）一定指向叶子节点，叶子节点的bro指针再指向其他非叶节点。
 	node *par;
 	node *bro;
 }node;
@@ -70,18 +70,90 @@ void BuildTree(float fre, int total)
 	node *nodeCur = NULL;
 	node *nodePre = NULL;
 	node *nodeLeftBro = NULL;
+	
+	root = (node *)malloc(sizeof(node));
+	root->bro = NULL;
+	root->son = NULL;
+	root->par = NULL;
+	root->leaf = 0;
+	
 	for (auto elem : Set){
+		nodePre = root;
+		nodeCur = NULL;
 		for (int i = 0; i < elem.second.size(); i++){//对每一个set里的每一个item建节点。
-			nodeCur = (node *)malloc(sizeof(node));
-			nodeCur->bro = NULL;
-			nodeCur->child = NULL;
-			nodeCur->par = NULL;
-			//TO DO
+			int infrequent;
+			if (itemCount[elem.second[i]] < fre * total)
+				infrequent = 1;
+			else
+				infrequent = 0;
+			if (infrequent == 0){//频繁项
+				if (nodeCur == NULL){//当前路径到头了
+					nodeCur = (node *)malloc(sizeof(node));
+					nodeCur->bro = NULL;
+					nodeCur->leaf = 0;
+					nodeCur->par = nodePre;
+					nodeCur->son = NULL;
+					nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
+					nodePre->son = nodeCur;
+					nodePre = nodeCur;
+				}
+				else{//当前路径没到头,遍历整层
+					for (; nodeCur != NULL && nodeCur->nodeRec.find(elem.second[i]) != nodeCur->nodeRec.end; nodeLeftBro = nodeCur, nodeCur = nodeCur->bro);
+					if (nodeCur == NULL){//整层都没有，新建
+						nodeCur = (node *)malloc(sizeof(node));
+						nodeCur->bro = NULL;
+						nodeCur->leaf = 0;
+						nodeCur->par = nodePre;
+						nodeCur->son = NULL;
+						nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
+						nodeLeftBro->bro = nodeCur;
+					}
+					else{//有，插入
+						nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
+					}
+					nodePre = nodeCur;
+				}
+				nodeCur = nodePre->son;
+			}
+			else{//非频繁项
+				if (nodeCur != NULL && nodeCur->leaf == 1){//当前路径已经建有叶子结点
+					nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
+				}
+				else{//当前路径到头了或者当前路径没有叶子节点
+					if (nodeCur == NULL){//当前路径到头了
+						nodeCur = (node *)malloc(sizeof(node));
+						nodeCur->bro = NULL;
+						nodeCur->leaf = 1;
+						nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
+						nodeCur->par = nodePre;
+						nodeCur->son = NULL;
+						nodePre->son = nodeCur;
+					}
+					else{//当前路径没有叶子节点
+						nodeLeftBro = nodeCur;
+						nodeCur = (node *)malloc(sizeof(node));
+						nodeCur->bro = NULL;
+						nodeCur->leaf = 1;
+						nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
+						nodeCur->par = nodePre;
+						nodeCur->son = NULL;
+						nodePre->son = nodeCur;
+						nodeCur->bro = nodeLeftBro;
+					}
+				}
+			}
+			
 		}
-		
 	}
 }
 
+void DLR(int index, node *nodePre, node *nodeCur){
+	
+}
+
+void LRD(int index, node *nodePre, node *nodeCur){
+
+}
 int main()
 {
 	string fileName = ".//data//mushroom.dat";
