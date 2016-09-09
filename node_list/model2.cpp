@@ -11,32 +11,41 @@ using namespace std;
 map<int, vector<int>> Set = {};
 int itemCount[3000] = { 0 };
 
-void ReadData(string fileName)
+int ReadData(string fileName)
 {
 	ifstream in(fileName);
 	string line;
-	int i = 0;
-	for (int setId = 0; getline(in, line) && i<7; setId++){
+	int setId ;
+	int maxnum = 0;
+	for (setId = 0; getline(in, line); setId++){
 		istringstream li(line);
 		vector<int> temp;
 		int data;
-		cout << line<<endl;
+		//cout << line<<endl;
+		int i = 0;
 		while (li >> data) {
 			Set[setId].push_back(data);
+			i++;
 		}
-		i++;
+		if (i > maxnum)
+			maxnum = i;
 	}
+	cout << fileName <<":"<< setId << endl;
+	cout << "maxnum:" << maxnum << endl;
 	cout << "ReadData Done--------" << endl;
+	return maxnum;
 }
 
-int CountData()
+int CountData(int maxnum)
 {
 	int total = 0;
+	memset(itemCount, 0, 3000 * sizeof(int));
 	for (int i = 0; i < Set.size(); i++)
 		for (int j = 0; j < Set[i].size(); j++)
 			itemCount[Set[i][j]] += 1;
-	for (int i = 0; i < 3000; i++)
+	for (int i = 0; i < maxnum; i++)
 		total += itemCount[i];
+
 	cout << "CountData Done--------" << endl;
 	return total;
 }
@@ -44,7 +53,7 @@ int CountData()
 bool compare(int a, int b){
 	return itemCount[a] > itemCount[b];
 }
-
+ 
 void RearrangeData()
 {
 	for (int i = 0; i < Set.size(); i++)
@@ -97,18 +106,20 @@ void BuildTree(float fre, int total)
 					nodeCur->leaf = 0;
 					nodeCur->par = nodePre;
 					nodeCur->son = NULL;
+					cout <<"new data("<< elem.second[i] << ":" << elem.first << endl;
 					nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
 					nodePre->son = nodeCur;
 					nodePre = nodeCur;
 				}
 				else{//当前路径没到头,遍历整层
-					for (; nodeCur != NULL && nodeCur->nodeRec.find(elem.second[i]) != nodeCur->nodeRec.end; nodeLeftBro = nodeCur, nodeCur = nodeCur->bro);
+					for (; nodeCur != NULL && nodeCur->nodeRec.find(elem.second[i]) != nodeCur->nodeRec.end(); nodeLeftBro = nodeCur, nodeCur = nodeCur->bro);
 					if (nodeCur == NULL){//整层都没有，新建
 						nodeCur = (node *)malloc(sizeof(node));
 						nodeCur->bro = NULL;
 						nodeCur->leaf = 0;
 						nodeCur->par = nodePre;
-						nodeCur->son = NULL;
+						nodeCur->son = NULL; 
+						cout << "new data(" << elem.second[i] << ":" << elem.first << endl;
 						nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
 						nodeLeftBro->bro = nodeCur;
 					}
@@ -128,6 +139,7 @@ void BuildTree(float fre, int total)
 						nodeCur = (node *)malloc(sizeof(node));
 						nodeCur->bro = NULL;
 						nodeCur->leaf = 1;
+						cout << "new data(" << elem.second[i] << ":" << elem.first << endl;
 						nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
 						nodeCur->par = nodePre;
 						nodeCur->son = NULL;
@@ -138,6 +150,7 @@ void BuildTree(float fre, int total)
 						nodeCur = (node *)malloc(sizeof(node));
 						nodeCur->bro = NULL;
 						nodeCur->leaf = 1;
+						cout << "new data(" << elem.second[i] << ":" << elem.first << endl;
 						nodeCur->nodeRec[elem.second[i]].push_back(elem.first);
 						nodeCur->par = nodePre;
 						nodeCur->son = NULL;
@@ -227,15 +240,16 @@ int LRD(int index, node *nodePre, node *nodeCur){
 }
 int main()
 {
-	string fileName = ".//data//mushroom.dat";
+	string fileName[] = { ".//data//mushroom.dat",".//data//accidents.dat",".//data//T10I4D100K.dat" };
 	float fre = 0.25;
 	int total;
-	ReadData(fileName);
-	total = CountData();
-	RearrangeData();
-	BuildTree(fre, total);
-	DLR(0, NULL, root);
-	LRD(0, NULL, root);
+	for (int i = 0; i < 3;i++)
+		ReadData(fileName[i]);
+		total = CountData();
+	//RearrangeData();
+	//BuildTree(fre, total);
+	//DLR(0, NULL, root);
+	//LRD(0, NULL, root);
 	//GenNodeList();
 	//Query();
 	system("pause");
