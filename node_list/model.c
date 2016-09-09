@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include<string.h>
 typedef struct set
 {
 	int id;
@@ -115,6 +115,7 @@ typedef struct nodeRec
 	int setId;
 	struct nodeRec *next;
 }nodeRec;
+typedef struct leaf leaf;
 typedef struct node
 {
 	int nodeId;
@@ -220,6 +221,7 @@ void BuildTree()
 				leafCur->firstNotFre->firstRec->setId = setCur->id;
 				leafCur->firstNotFre->firstRec->next = NULL;
 				leafCur->firstNotFre->lastRec = leafCur->firstNotFre->firstRec;
+				printf("DEBUG(setCur->element[i]):%d\n", setCur->element[i]);
 				leafCur->firstNotFre->leafId = setCur->element[i];
 				leafCur->firstNotFre->next = NULL;
 				leafCur->leafRecNum = 1;
@@ -256,8 +258,8 @@ void BuildTree()
 int DLR(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 {
 	if (nodeCur == NULL && leafCur != NULL){
-		leafCur->DLR == index;
-		leafRec * temp = leafCur;
+		leafCur->DLR = index;
+		leafRec * temp = leafCur->firstNotFre;
 		for (int i = 0; i < leafCur->leafRecNum; i++){
 			printf("%d ", temp->leafId);
 			temp = temp->next;
@@ -284,6 +286,7 @@ int DLR(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 			}
 		}
 	} 
+	return 0;
 }
 
 int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
@@ -291,7 +294,7 @@ int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 	int temp = 0;
 	if (leafCur != NULL && nodeCur == NULL){
 		leafCur->LRD = index;
-		leafRec * temp = leafCur;
+		leafRec * temp = leafCur->firstNotFre;
 		for (int i = 0; i < leafCur->leafRecNum; i++){
 			printf("%d ", temp->leafId);
 			temp = temp->next;
@@ -308,7 +311,7 @@ int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 		}
 		else{
 			if (leafCur == NULL && nodeCur == NULL){
-				nodePre->LRD == index;
+				nodePre->LRD = index;
 				printf("%d (DLR):%d\n", nodePre->nodeId, nodePre->LRD);
 				if (nodePre == root)
 					return 0;
@@ -317,22 +320,12 @@ int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 			}
 		}
 	}
+	return 0;
 }
 
-void CheckTree()
-{
 
-}
 
-void GenNodeList()
-{
 
-}
-
-void Query()
-{
-
-}
 int main()
 {
 	char *filePath = ".//data//mushroom.dat";
@@ -341,11 +334,11 @@ int main()
 
 	totalNum = ReadData(filePath);
 	CountData();
-	CheckSet();
+	//CheckSet();
 	RearrangeData(totalNum,threshold);
-	CheckSet();
+	//CheckSet();
 	BuildTree();
-	CheckTree();
+	//CheckTree();
 	DLR(0, NULL, root, NULL);
 	LRD(0, NULL, root, NULL);
 	//CheckTree();
