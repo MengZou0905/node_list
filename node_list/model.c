@@ -257,11 +257,18 @@ int DLR(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 {
 	if (nodeCur == NULL && leafCur != NULL){
 		leafCur->DLR == index;
+		leafRec * temp = leafCur;
+		for (int i = 0; i < leafCur->leafRecNum; i++){
+			printf("%d ", temp->leafId);
+			temp = temp->next;
+		}
+		printf("(DLR):%d\n", leafCur->DLR);
 		DLR(index + 1, nodePre, leafCur->bro, NULL);
 	}
 	else{
 		if (nodeCur != NULL && leafCur == NULL){
 			nodeCur->DLR = index;
+			printf("%d (DLR):%d\n",nodeCur->nodeId, nodeCur->DLR);
 			if (nodeCur->sonleaf != NULL)
 				DLR(index + 1, nodeCur, NULL, nodeCur->sonleaf);
 			else
@@ -284,6 +291,12 @@ int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 	int temp = 0;
 	if (leafCur != NULL && nodeCur == NULL){
 		leafCur->LRD = index;
+		leafRec * temp = leafCur;
+		for (int i = 0; i < leafCur->leafRecNum; i++){
+			printf("%d ", temp->leafId);
+			temp = temp->next;
+		}
+		printf("(DLR):%d\n", leafCur->LRD);
 		LRD(index + 1, nodePre, leafCur->bro, NULL);
 	}
 	else{
@@ -296,6 +309,7 @@ int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 		else{
 			if (leafCur == NULL && nodeCur == NULL){
 				nodePre->LRD == index;
+				printf("%d (DLR):%d\n", nodePre->nodeId, nodePre->LRD);
 				if (nodePre == root)
 					return 0;
 				else
