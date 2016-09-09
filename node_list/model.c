@@ -6,7 +6,7 @@ typedef struct set
 	int id;
 	int eleNum;
 	int freSep;
-	int element[150];
+	int element[60];
 	struct set *next;
 }set;
 set *setHead = NULL;
@@ -21,9 +21,8 @@ int ReadData(char *path)
 	int totalNum = 0;
 
 	fr = fopen(path, "r");
-	int time = 0;
-	while (fgets(buf, sizeof(buf), fr) && time < 5){
-		time ++;
+	while (fgets(buf, sizeof(buf), fr) && totalNum < 5){
+		totalNum++;
 		//printf("%s", buf);
 		cur = (set *)malloc(sizeof(set));
 		cur->next = NULL;
@@ -58,7 +57,6 @@ int ReadData(char *path)
 			//printf("buf:%s\n",buf);	
 		}
 		id++;
-		totalNum += cur->eleNum;
 		/*
 		printf("id: %d: ",id-1);
 		for (int i = 0; i < cur->eleNum; i++)
@@ -67,7 +65,7 @@ int ReadData(char *path)
 		*/
 	}
 	fclose(fr);
-
+	printf("DEBUG(totalNum):%d\n",totalNum);
 	return totalNum;
 }
 
@@ -84,7 +82,7 @@ void CountData(){
 	*/
 }
 
-void RearrangeData(int totalNum, float threshold){
+void RearrangeData(float baseFreCount){
 	for (set *setCur = setHead; setCur != NULL; setCur = setCur->next){
 		for (int i = 0; i < setCur->eleNum; i++){
 			for (int j = i + 1; j < setCur->eleNum; j++){
@@ -92,21 +90,29 @@ void RearrangeData(int totalNum, float threshold){
 					int temp = setCur->element[i];
 					setCur->element[i] = setCur->element[j];
 					setCur->element[j] = temp;
+					
 				}
 			}
 		}
+		setCur->freSep = 0;
+		for (int i = 0; i < setCur->eleNum; i++){
+			if (itemCount[setCur->element[i]] > baseFreCount)
+				setCur->freSep = i + 1;
+		}
+		
 	}
 }
 
 void CheckSet()
 {
 	for (set *setCur = setHead; setCur != NULL; setCur = setCur->next){
-		printf("id:%d\n",setCur->id);
-		printf("num:%d\n",setCur->eleNum);
+		printf("setCur->id:%d\n", setCur->id);
+		printf("setCur->eleNum:%d\n", setCur->eleNum);
+		printf("element(count):");
 		for (int i = 0; i < setCur->eleNum; i++){
 			printf("%d(%d) ", setCur->element[i], itemCount[setCur->element[i]]);
 		}
-		printf("\n\n");
+		printf("\nsetCur->freSep:%d\n\n", setCur->freSep);
 	}
 }
 
@@ -295,11 +301,12 @@ int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 	if (leafCur != NULL && nodeCur == NULL){
 		leafCur->LRD = index;
 		leafRec * temp = leafCur->firstNotFre;
+		printf("leaf:");
 		for (int i = 0; i < leafCur->leafRecNum; i++){
 			printf("%d ", temp->leafId);
 			temp = temp->next;
 		}
-		printf("(DLR):%d\n", leafCur->LRD);
+		printf("(LRD):%d\n", leafCur->LRD);
 		LRD(index + 1, nodePre, leafCur->bro, NULL);
 	}
 	else{
@@ -312,7 +319,7 @@ int LRD(int index, node *nodePre, node *nodeCur, leaf *leafCur)
 		else{
 			if (leafCur == NULL && nodeCur == NULL){
 				nodePre->LRD = index;
-				printf("%d (DLR):%d\n", nodePre->nodeId, nodePre->LRD);
+				printf("%d (LRD):%d\n", nodePre->nodeId, nodePre->LRD);
 				if (nodePre == root)
 					return 0;
 				else
@@ -334,9 +341,11 @@ int main()
 
 	totalNum = ReadData(filePath);
 	CountData();
-	//CheckSet();
-	RearrangeData(totalNum,threshold);
-	//CheckSet();
+	float baseFreCount = totalNum * threshold;
+	printf("base frequent: %d\n", baseFreCount);
+	RearrangeData(baseFreCount);
+	
+	CheckSet();
 	BuildTree();
 	//CheckTree();
 	DLR(0, NULL, root, NULL);
