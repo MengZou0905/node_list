@@ -4,19 +4,20 @@
 #include<fstream>
 #include<sstream>
 #include<string>
+#include<time.h> 
 #include<stdlib.h>
 #include<algorithm>
 using namespace std;
 
 map<int, vector<int>> setData;
 
-int ReadFile(string path)
+float ReadFile(string path,float fre)
 {
 	ifstream in(path);
 	string line;
 	int setId;
 	int maxnum = 0;
-	for (setId = 0; getline(in, line) && setId<5; setId++){
+	for (setId = 0; getline(in, line); setId++){
 		istringstream li(line);
 		vector<int> temp;
 		int data;
@@ -25,7 +26,7 @@ int ReadFile(string path)
 		}
 
 	}
-	return setId;
+	return setId*fre;
 }
 
 int itemCount[1000] = { 0 };
@@ -36,7 +37,7 @@ void CountData()
 	for (int i = 0; i < setData.size(); i++)
 		for (int j = 0; j < setData[i].size(); j++)
 			itemCount[setData[i][j]] += 1;
-	//cout << "CountData Done--------" << endl;
+	
 	return;
 }
 
@@ -48,14 +49,16 @@ void RearrangeData()
 {
 	for (int i = 0; i < setData.size(); i++)
 		sort(setData[i].begin(), setData[i].end(), compare);
-	cout << "RearrangeData Done--------" << endl;
 	
+	/*
 	for (int i = 0; i < setData.size(); i++){
 		cout << "after:";
 		for (int j = 0; j < setData[i].size(); j++)
 			cout << setData[i][j] << "(" << itemCount[setData[i][j]] << ") ";
 		cout << endl;
 	}
+	*/
+	
 	
 }
 
@@ -142,7 +145,7 @@ int index = 0;
 void ResetIndex(){
 	index = 0;
 }
-void DLR(node *cur)
+void Pre(node *cur)
 {
 	if (cur == NULL){
 		return;
@@ -151,12 +154,15 @@ void DLR(node *cur)
 	index = index + 1;
 	vector<node *>::iterator vi;
 	for (vi = cur->son.begin(); vi != cur->son.end(); ++vi){
-		DLR(*vi);
+		Pre(*vi);
 	}
 	return;
 }
-
-void LRD(node *cur)
+void DLR(node * cur){
+	ResetIndex();
+	Pre(cur);
+}
+void Post(node *cur)
 {
 	if (cur->son.empty() == true){
 		cur->LRD = index;
@@ -165,13 +171,16 @@ void LRD(node *cur)
 	}
 	vector<node *>::iterator vi;
 	for (vi = cur->son.begin(); vi != cur->son.end(); ++vi){
-		LRD(*vi);
+		Post(*vi);
 	}
 	cur->LRD = index;
 	index = index + 1;
 	return;
 }
-
+void LRD(node * cur){
+	ResetIndex();
+	Post(cur);
+}
 void CheckTree(node * cur){
 	if (cur == NULL){
 		return;
@@ -229,8 +238,120 @@ void CheckNodeList(){
 		cout << "}" << endl;
 	}
 }
-void Query(){
 
+int f[1000];
+int u[1000];
+int r[1000];
+int fi;
+int ui;
+int ri;
+bool CompareOnNodeList(int a, int b)
+{
+	return nodeList[a].size() < nodeList[b].size();
+}
+void SepFreUnfre(float baseFre)
+{
+	memset(f, 0, sizeof(f));
+	memset(u, 0, sizeof(u));
+	memset(r, 0, sizeof(r));
+	fi = 0;
+	ui = 0;
+	ri = 0;
+	for (int i = 0; i < 1000; i++){
+		if (itemCount[i] != 0){
+			r[ri] = itemCount[i];
+			ri++;
+			if (itemCount[i] >= baseFre){
+				f[fi] = itemCount[i];
+				fi++;
+			}
+			else{
+				u[ui] = itemCount[i];
+				ui++;
+			}
+		}	
+	}
+}
+
+short f2[1000][2];
+short f4[1000][4];
+short f6[1000][6];
+void GenFre(int num){
+	for (int producted = 0; producted < num; producted++){
+		for (int j = 0; j < 2; j++){
+			srand((unsigned)time(NULL));
+			f2[producted][j] = f[rand() % fi];
+		}
+		for (int j = 0; j < 4; j++){
+			srand((unsigned)time(NULL));
+			f4[producted][j] = f[rand() % fi];
+		}
+		for (int j = 0; j < 6; j++){
+			srand((unsigned)time(NULL));
+			f6[producted][j] = f[rand() % fi];
+		}
+	}
+	for (int producted = 0; producted < num; producted++){
+		sort(f2[producted], f2[producted] + 2, CompareOnNodeList);
+		sort(f4[producted], f4[producted] + 4, CompareOnNodeList);
+		sort(f6[producted], f6[producted] + 6, CompareOnNodeList);
+	}
+		
+}
+short u2[1000][2];
+short u4[1000][4];
+short u6[1000][6];
+void GenUnfre(int num){
+	for (int producted = 0; producted < num; producted++){
+		for (int j = 0; j < 2; j++){
+			srand((unsigned)time(NULL));
+			u2[producted][j] = u[rand() % ui];
+		}
+		for (int j = 0; j < 4; j++){
+			srand((unsigned)time(NULL));
+			u4[producted][j] = u[rand() % ui];
+		}
+		for (int j = 0; j < 6; j++){
+			srand((unsigned)time(NULL));
+			u6[producted][j] = u[rand() % ui];
+		}
+	}
+	for (int producted = 0; producted < num; producted++){
+		sort(u2[producted], u2[producted] + 2, CompareOnNodeList);
+		sort(u4[producted], u4[producted] + 4, CompareOnNodeList);
+		sort(u6[producted], u6[producted] + 6, CompareOnNodeList);
+	}
+}
+short r2[1000][2];
+short r4[1000][4];
+short r6[1000][6];
+void GenRan(int num){
+	for (int producted = 0; producted < num; producted++){
+		vector<int> temp;
+		for (int j = 0; j < 2; ){
+			srand((unsigned)time(NULL));
+			int t = rand() % ri;
+			if (find(temp.begin(), temp.end(), t) == temp.end()){
+				r2[producted][j] = r[t];
+				temp.push_back(t);
+				j++;
+			}	
+		}
+		temp.clear();
+		for (int j = 0; j < 4; j++){
+			srand((unsigned)time(NULL));
+			r4[producted][j] = r[rand() % ri];
+		}
+		for (int j = 0; j < 6; j++){
+			srand((unsigned)time(NULL));
+			r6[producted][j] = r[rand() % ri];
+		}
+	}
+	for (int producted = 0; producted < num; producted++){
+		sort(r2[producted], r2[producted] + 2, CompareOnNodeList);
+		sort(r4[producted], r4[producted] + 4, CompareOnNodeList);
+		sort(r6[producted], r6[producted] + 6, CompareOnNodeList);
+	}
 }
 int main(){
 	
@@ -238,21 +359,23 @@ int main(){
 	string path = ".//data//mushroom.dat";
 	float fre = 0.25;
 	float baseFre;
-	int setNum;
 	
-	setNum = ReadFile(path);
+	baseFre = ReadFile(path, fre);
+	cout << "频繁项最低支持度：" << baseFre << endl;
 	CountData();
+	cout << "CountData Done------------" << endl;
 	RearrangeData();
-	baseFre = setNum * fre;
-	cout << "频繁项最低支持度：" <<baseFre<< endl;
-	node * root = BuildTree(baseFre);
-	ResetIndex();
-	DLR(root);
-	ResetIndex(); 
-	LRD(root);
-	CheckTree(root);
-	GenNodeList(root);
-	CheckNodeList();
+	cout << "RearrangeData Done--------" << endl;
+	//node * root = BuildTree(baseFre);
+	//cout << "BuildTree Done------------" << endl;
+	//DLR(root); 
+	//LRD(root);
+
+	//GenNodeList(root);
+	//cout << "GenNodeList Done----------" << endl;
+	GenFre(baseFre);
+	GenUnfre(baseFre);
+	GenRan(baseFre);
 	system("pause");
 	return 0;
 }
