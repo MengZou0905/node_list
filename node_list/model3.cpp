@@ -195,9 +195,43 @@ void CheckTree(node * cur){
 		CheckTree(*vi);
 	}
 	return;
-	return;
 }
 
+map< int, map< pair<int, int>, vector<int> > > nodeList;
+
+void GenNodeList(node *cur){
+	if (cur == NULL){
+		return;
+	}
+	
+	for (auto arec: cur->nodeRec){//map<int, vector<int>> nodeRec;
+		nodeList[arec.first][make_pair(cur->DLR, cur->LRD)] = arec.second;
+	}
+	vector<node *>::iterator vi;
+	for (vi = cur->son.begin(); vi != cur->son.end(); ++vi){
+		GenNodeList(*vi);
+	}
+	return;
+}
+void CheckNodeList(){
+	//map< int, map< pair<int, int>, vector<int> > > nodeList;
+	map< int, map< pair<int, int>, vector<int> > >::iterator mi;
+	for (mi = nodeList.begin(); mi != nodeList.end(); ++mi){
+		cout << (*mi).first << "->{";
+		map< pair<int, int>, vector<int> >::iterator mii;
+		for (mii = (*mi).second.begin(); mii != (*mi).second.end(); ++mii){
+			cout << "(<" << (*mii).first.first << "," << (*mii).first.second << ">:{";
+			for (auto setId : (*mii).second){
+				cout << setId << ",";
+			}
+			cout << "})\n";
+		}
+		cout << "}" << endl;
+	}
+}
+void Query(){
+
+}
 int main(){
 	
 	map<string, float> data_fre = { { ".//data//mushroom.dat", 0.25 }, { ".//data//accidents.dat", 0.5 }, { ".//data//T10I4D100K.dat", 0.005 } };
@@ -217,6 +251,8 @@ int main(){
 	ResetIndex(); 
 	LRD(root);
 	CheckTree(root);
+	GenNodeList(root);
+	CheckNodeList();
 	system("pause");
 	return 0;
 }
