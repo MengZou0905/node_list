@@ -66,7 +66,6 @@ public:
 	int DLR, LRD;
 	map<int, vector<int>> nodeRec;
 	vector<node *> son;
-	node *par;
 	node(){
 		leaf = 0;
 	}
