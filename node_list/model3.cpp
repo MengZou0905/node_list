@@ -145,6 +145,7 @@ int index = 0;
 void ResetIndex(){
 	index = 0;
 }
+
 void Pre(node *cur)
 {
 	if (cur == NULL){
@@ -158,10 +159,7 @@ void Pre(node *cur)
 	}
 	return;
 }
-void DLR(node * cur){
-	ResetIndex();
-	Pre(cur);
-}
+
 void Post(node *cur)
 {
 	if (cur->son.empty() == true){
@@ -177,10 +175,17 @@ void Post(node *cur)
 	index = index + 1;
 	return;
 }
+
+void DLR(node * cur){
+	ResetIndex();
+	Pre(cur);
+}
+
 void LRD(node * cur){
 	ResetIndex();
 	Post(cur);
 }
+
 void CheckTree(node * cur){
 	if (cur == NULL){
 		return;
@@ -245,10 +250,12 @@ int r[1000];
 int fi;
 int ui;
 int ri;
+
 bool CompareOnNodeList(int a, int b)
 {
 	return nodeList[a].size() < nodeList[b].size();
 }
+
 void SepFreUnfre(float baseFre)
 {
 	memset(f, 0, sizeof(f));
@@ -273,85 +280,215 @@ void SepFreUnfre(float baseFre)
 	}
 }
 
+map<int, int> arec;
+map<tuple<int, int>, int> aset2;
+map<tuple<int, int, int, int>, int> aset4;
+map<tuple<int, int, int, int, int, int>, int> aset6;
+tuple<int, int> cur2;
+tuple<int, int, int, int> cur4;
+tuple<int, int, int, int, int, int> cur6;
 short f2[1000][2];
 short f4[1000][4];
 short f6[1000][6];
-void GenFre(int num){
-	for (int producted = 0; producted < num; producted++){
-		for (int j = 0; j < 2; j++){
-			srand((unsigned)time(NULL));
-			f2[producted][j] = f[rand() % fi];
-		}
-		for (int j = 0; j < 4; j++){
-			srand((unsigned)time(NULL));
-			f4[producted][j] = f[rand() % fi];
-		}
-		for (int j = 0; j < 6; j++){
-			srand((unsigned)time(NULL));
-			f6[producted][j] = f[rand() % fi];
-		}
-	}
-	for (int producted = 0; producted < num; producted++){
-		sort(f2[producted], f2[producted] + 2, CompareOnNodeList);
-		sort(f4[producted], f4[producted] + 4, CompareOnNodeList);
-		sort(f6[producted], f6[producted] + 6, CompareOnNodeList);
-	}
-		
-}
 short u2[1000][2];
 short u4[1000][4];
 short u6[1000][6];
-void GenUnfre(int num){
-	for (int producted = 0; producted < num; producted++){
-		for (int j = 0; j < 2; j++){
-			srand((unsigned)time(NULL));
-			u2[producted][j] = u[rand() % ui];
-		}
-		for (int j = 0; j < 4; j++){
-			srand((unsigned)time(NULL));
-			u4[producted][j] = u[rand() % ui];
-		}
-		for (int j = 0; j < 6; j++){
-			srand((unsigned)time(NULL));
-			u6[producted][j] = u[rand() % ui];
-		}
-	}
-	for (int producted = 0; producted < num; producted++){
-		sort(u2[producted], u2[producted] + 2, CompareOnNodeList);
-		sort(u4[producted], u4[producted] + 4, CompareOnNodeList);
-		sort(u6[producted], u6[producted] + 6, CompareOnNodeList);
-	}
-}
 short r2[1000][2];
 short r4[1000][4];
 short r6[1000][6];
-void GenRan(int num){
-	for (int producted = 0; producted < num; producted++){
-		vector<int> temp;
-		for (int j = 0; j < 2; ){
-			srand((unsigned)time(NULL));
-			int t = rand() % ri;
-			if (find(temp.begin(), temp.end(), t) == temp.end()){
-				r2[producted][j] = r[t];
-				temp.push_back(t);
-				j++;
-			}	
+
+void Gen2(int count, int* ori, int left, int right, short*pos,){
+	//Gen2:生成两个不重复的随机数，存入pos指向的数组中
+	//count:已经成功生成的随机数
+	//left：左边界，可以取到
+	//right：右边界，取不到
+	//pos:存放2个随机数的数组起始位置
+	if (count == 2){
+		int i = 0;
+		for (auto elem : arec){
+			*(pos + i) = *(ori + elem.first);
+			i++;
 		}
-		temp.clear();
+		arec.clear();
+		cur2 = make_tuple(*pos, *(pos + 1));
+		return;
+	}
+	int cur = rand() % (right - left) + left;
+	if (arec.find(cur) == arec.end()){
+		count++;
+		arec[cur] = 1;
+	}
+	Gen2(count, ori, left, right, pos);
+	return;
+}
+void Gen4(int count, int *ori, int left, int right, short*pos){
+	//Gen4:生成四个不重复的随机数，存入pos指向的数组中
+	//count:已经成功生成的随机数
+	//left：左边界，可以取到
+	//right：右边界，取不到
+	//pos:存放4个随机数的数组起始位置
+	if (count == 4){
+		int i = 0;
+		for (auto elem : arec){
+			*(pos + i) = *(ori + elem.first);
+			i++;
+		}
+		arec.clear();
+		cur4 = make_tuple(*pos, *(pos + 1), *(pos + 2), *(pos + 3));
+		return;
+	}
+	int cur = rand() % (right - left) + left;
+	if (arec.find(cur) == arec.end()){
+		count++;
+		arec[cur] = 1;
+	}
+	Gen4(count, left, right, pos);
+	return;
+}
+void Gen6(int count, int *ori, int left, int right, short*pos){
+	//Gen6:生成六个不重复的随机数，存入pos指向的数组中
+	//count:已经成功生成的随机数
+	//left：左边界，可以取到
+	//right：右边界，取不到
+	//pos:存放2个随机数的数组起始位置
+	if (count == 6){
+		int i = 0;
+		for (auto elem : arec){
+			*(pos + i) = *(ori + elem.first);
+			i++;
+		}
+		arec.clear();
+		cur6 = make_tuple(*pos, *(pos + 1), *(pos + 2), *(pos + 3), *(pos + 4), *(pos + 5));
+		return;
+	}
+	int cur = rand() % (right - left) + left;
+	if (arec.find(cur) == arec.end()){
+		count++;
+		arec[cur] = 1;
+	}
+	Gen6(count, left, right, pos);
+	return;
+}
+
+void GenFre(int n,int *ori, int left, int right){
+	//GenFre：从频繁项中生成n个不相同的数串，数串长度分别为2，4，6
+	//left：左边界，可以取到
+	//right:右边界，取不到
+	for (int i = 0; i < n;){
+		Gen2(0,ori, left, right, f2[i]);
+		if (aset2.find(cur2) == aset2.end()){
+			i++;
+			aset2[cur2] = 1;
+		}
+	}
+	aset2.clear();
+	for (int i = 0; i < n;){
+		Gen4(0, ori, left, right, f4[i]);
+		if (aset4.find(cur4) == aset4.end()){
+			i++;
+			aset4[cur4] = 1;
+		}
+	}
+	aset4.clear();
+	for (int i = 0; i < n;){
+		Gen6(0, ori, left, right, f6[i]);
+		if (aset6.find(cur6) == aset6.end()){
+			i++;
+			aset6[cur6] = 1;
+		}
+	}
+	aset6.clear();
+	return;
+}
+void GenUnfre(int n, int *ori, int left, int right){
+	for (int i = 0; i < n;){
+		Gen2(0, ori, left, right, u2[i]);
+		if (aset2.find(cur2) == aset2.end()){
+			i++;
+			aset2[cur2] = 1;
+		}
+	}
+	aset2.clear();
+	for (int i = 0; i < n;){
+		Gen4(0, ori, left, right, u4[i]);
+		if (aset4.find(cur4) == aset4.end()){
+			i++;
+			aset4[cur4] = 1;
+		}
+	}
+	aset4.clear();
+	for (int i = 0; i < n;){
+		Gen6(0, ori, left, right, u6[i]);
+		if (aset6.find(cur6) == aset6.end()){
+			i++;
+			aset6[cur6] = 1;
+		}
+	}
+	aset6.clear();
+	return;
+}
+void GenRan(int n, int *ori, int left, int right){
+	for (int i = 0; i < n;){
+		Gen2(0, ori, left, right, r2[i]);
+		if (aset2.find(cur2) == aset2.end()){
+			i++;
+			aset2[cur2] = 1;
+		}
+	}
+	aset2.clear();
+	for (int i = 0; i < n;){
+		Gen4(0, ori, left, right, r4[i]);
+		if (aset4.find(cur4) == aset4.end()){
+			i++;
+			aset4[cur4] = 1;
+		}
+	}
+	aset4.clear();
+	for (int i = 0; i < n;){
+		Gen6(0, ori, left, right, r6[i]);
+		if (aset6.find(cur6) == aset6.end()){
+			i++;
+			aset6[cur6] = 1;
+		}
+	}
+	aset6.clear();
+	return;
+}
+void CheckGen()
+{
+	for (int ii = 0; ii < 1000; ii++){
+		f[ii] = ii;
+	}
+	//GenFre(0, 1000, 0, 1000);
+	srand((unsigned)time(NULL));
+	GenFre(1000, 0, 1000);
+
+	for (int i = 0; i < 1000; i++){
+
+		for (int j = 0; j < 2; j++){
+			cout << f2[i][j] << " ";
+		}
+		cout << endl;
+
+	}
+	for (int i = 0; i < 1000; i++){
+
 		for (int j = 0; j < 4; j++){
-			srand((unsigned)time(NULL));
-			r4[producted][j] = r[rand() % ri];
+			cout << f4[i][j] << " ";
 		}
+		cout << endl;
+
+	}
+	for (int i = 0; i < 1000; i++){
+
 		for (int j = 0; j < 6; j++){
-			srand((unsigned)time(NULL));
-			r6[producted][j] = r[rand() % ri];
+			cout << f6[i][j] << " ";
 		}
+		cout << endl;
+
 	}
-	for (int producted = 0; producted < num; producted++){
-		sort(r2[producted], r2[producted] + 2, CompareOnNodeList);
-		sort(r4[producted], r4[producted] + 4, CompareOnNodeList);
-		sort(r6[producted], r6[producted] + 6, CompareOnNodeList);
-	}
+	return;
+
 }
 int main(){
 	
@@ -373,9 +510,12 @@ int main(){
 
 	//GenNodeList(root);
 	//cout << "GenNodeList Done----------" << endl;
-	GenFre(baseFre);
-	GenUnfre(baseFre);
-	GenRan(baseFre);
+	SepFreUnfre(baseFre);
+	cout << "fi:" << fi << ",ui" << ui << ",ri" << ri << endl;
+	GenFre(1000,f, 0, fi);
+	GenUnfre(1000,u, 0, ui);
+	GenRan(1000,r, 0, ri);
+	CheckGen();
 	system("pause");
 	return 0;
 }
