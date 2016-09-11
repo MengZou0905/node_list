@@ -244,9 +244,10 @@ void CheckNodeList(){
 	}
 }
 
-int f[1000];
-int u[1000];
-int r[1000];
+#define TESTNUM 500
+int f[TESTNUM];
+int u[TESTNUM];
+int r[TESTNUM];
 int fi;
 int ui;
 int ri;
@@ -266,14 +267,14 @@ void SepFreUnfre(float baseFre)
 	ri = 0;
 	for (int i = 0; i < 1000; i++){
 		if (itemCount[i] != 0){
-			r[ri] = itemCount[i];
+			r[ri] = i;
 			ri++;
 			if (itemCount[i] >= baseFre){
-				f[fi] = itemCount[i];
+				f[fi] = i;
 				fi++;
 			}
 			else{
-				u[ui] = itemCount[i];
+				u[ui] = i;
 				ui++;
 			}
 		}	
@@ -287,17 +288,18 @@ map<tuple<int, int, int, int, int, int>, int> aset6;
 tuple<int, int> cur2;
 tuple<int, int, int, int> cur4;
 tuple<int, int, int, int, int, int> cur6;
-short f2[1000][2];
-short f4[1000][4];
-short f6[1000][6];
-short u2[1000][2];
-short u4[1000][4];
-short u6[1000][6];
-short r2[1000][2];
-short r4[1000][4];
-short r6[1000][6];
+short f2[TESTNUM][2];
+short f4[TESTNUM][4];
+short f6[TESTNUM][6];
+short u2[TESTNUM][2];
+short u4[TESTNUM][4];
+short u6[TESTNUM][6];
+short r2[TESTNUM][2];
+short r4[TESTNUM][4];
+short r6[TESTNUM][6];
 
-void Gen2(int count, int* ori, int left, int right, short*pos,){
+
+void Gen2(int count, int* ori, int left, int right, short*pos){
 	//Gen2:生成两个不重复的随机数，存入pos指向的数组中
 	//count:已经成功生成的随机数
 	//left：左边界，可以取到
@@ -305,10 +307,13 @@ void Gen2(int count, int* ori, int left, int right, short*pos,){
 	//pos:存放2个随机数的数组起始位置
 	if (count == 2){
 		int i = 0;
+		//cout << "gen2:";
 		for (auto elem : arec){
 			*(pos + i) = *(ori + elem.first);
+			//cout << *(pos + i) << ",";
 			i++;
 		}
+		//cout << endl;
 		arec.clear();
 		cur2 = make_tuple(*pos, *(pos + 1));
 		return;
@@ -342,7 +347,7 @@ void Gen4(int count, int *ori, int left, int right, short*pos){
 		count++;
 		arec[cur] = 1;
 	}
-	Gen4(count, left, right, pos);
+	Gen4(count, ori,left, right, pos);
 	return;
 }
 void Gen6(int count, int *ori, int left, int right, short*pos){
@@ -366,7 +371,7 @@ void Gen6(int count, int *ori, int left, int right, short*pos){
 		count++;
 		arec[cur] = 1;
 	}
-	Gen6(count, left, right, pos);
+	Gen6(count, ori,left, right, pos);
 	return;
 }
 
@@ -374,13 +379,16 @@ void GenFre(int n,int *ori, int left, int right){
 	//GenFre：从频繁项中生成n个不相同的数串，数串长度分别为2，4，6
 	//left：左边界，可以取到
 	//right:右边界，取不到
+	
 	for (int i = 0; i < n;){
 		Gen2(0,ori, left, right, f2[i]);
 		if (aset2.find(cur2) == aset2.end()){
+			//cout <<"Fre:" <<i << endl;
 			i++;
 			aset2[cur2] = 1;
 		}
 	}
+	
 	aset2.clear();
 	for (int i = 0; i < n;){
 		Gen4(0, ori, left, right, f4[i]);
@@ -401,13 +409,16 @@ void GenFre(int n,int *ori, int left, int right){
 	return;
 }
 void GenUnfre(int n, int *ori, int left, int right){
+	
 	for (int i = 0; i < n;){
 		Gen2(0, ori, left, right, u2[i]);
 		if (aset2.find(cur2) == aset2.end()){
+			//cout << "GenUnfre:" << i << endl;
 			i++;
 			aset2[cur2] = 1;
 		}
 	}
+	
 	aset2.clear();
 	for (int i = 0; i < n;){
 		Gen4(0, ori, left, right, u4[i]);
@@ -428,13 +439,16 @@ void GenUnfre(int n, int *ori, int left, int right){
 	return;
 }
 void GenRan(int n, int *ori, int left, int right){
+	
 	for (int i = 0; i < n;){
 		Gen2(0, ori, left, right, r2[i]);
 		if (aset2.find(cur2) == aset2.end()){
+			//cout << "GenRan:" << i << endl;
 			i++;
 			aset2[cur2] = 1;
 		}
 	}
+	
 	aset2.clear();
 	for (int i = 0; i < n;){
 		Gen4(0, ori, left, right, r4[i]);
@@ -456,33 +470,26 @@ void GenRan(int n, int *ori, int left, int right){
 }
 void CheckGen()
 {
-	for (int ii = 0; ii < 1000; ii++){
-		f[ii] = ii;
-	}
-	//GenFre(0, 1000, 0, 1000);
-	srand((unsigned)time(NULL));
-	GenFre(1000, 0, 1000);
-
-	for (int i = 0; i < 1000; i++){
+	for (int i = 0; i < TESTNUM; i++){
 
 		for (int j = 0; j < 2; j++){
-			cout << f2[i][j] << " ";
+			cout << u2[i][j] << " ";
 		}
 		cout << endl;
 
 	}
-	for (int i = 0; i < 1000; i++){
+	for (int i = 0; i < TESTNUM; i++){
 
 		for (int j = 0; j < 4; j++){
-			cout << f4[i][j] << " ";
+			cout << u4[i][j] << " ";
 		}
 		cout << endl;
 
 	}
-	for (int i = 0; i < 1000; i++){
+	for (int i = 0; i < TESTNUM; i++){
 
 		for (int j = 0; j < 6; j++){
-			cout << f6[i][j] << " ";
+			cout << u6[i][j] << " ";
 		}
 		cout << endl;
 
@@ -512,9 +519,14 @@ int main(){
 	//cout << "GenNodeList Done----------" << endl;
 	SepFreUnfre(baseFre);
 	cout << "fi:" << fi << ",ui" << ui << ",ri" << ri << endl;
-	GenFre(1000,f, 0, fi);
-	GenUnfre(1000,u, 0, ui);
-	GenRan(1000,r, 0, ri);
+	cout << "ui:" << endl;
+	for (int i = 0; i < ui; i++){
+		cout << u[i]<<",";
+	}
+	cout << endl;
+	GenFre(TESTNUM, f, 0, fi);
+	GenUnfre(TESTNUM, u, 0, ui);
+	GenRan(TESTNUM, r, 0, ri);
 	CheckGen();
 	system("pause");
 	return 0;
