@@ -254,7 +254,7 @@ int ri;
 
 bool CompareOnNodeList(int a, int b)
 {
-	return nodeList[a].size() < nodeList[b].size();
+	return (nodeList[a].size() < nodeList[b].size());
 }
 
 void SepFreUnfre(float baseFre)
@@ -313,6 +313,8 @@ void Gen2(int count, int* ori, int left, int right, short*pos){
 			//cout << *(pos + i) << ",";
 			i++;
 		}
+		//sort(setData[i].begin(), setData[i].end(), compare);
+		sort(pos, pos+2,CompareOnNodeList);
 		//cout << endl;
 		arec.clear();
 		cur2 = make_tuple(*pos, *(pos + 1));
@@ -338,6 +340,7 @@ void Gen4(int count, int *ori, int left, int right, short*pos){
 			*(pos + i) = *(ori + elem.first);
 			i++;
 		}
+		sort(pos, pos + 4, CompareOnNodeList);
 		arec.clear();
 		cur4 = make_tuple(*pos, *(pos + 1), *(pos + 2), *(pos + 3));
 		return;
@@ -362,6 +365,7 @@ void Gen6(int count, int *ori, int left, int right, short*pos){
 			*(pos + i) = *(ori + elem.first);
 			i++;
 		}
+		sort(pos, pos + 6, CompareOnNodeList);
 		arec.clear();
 		cur6 = make_tuple(*pos, *(pos + 1), *(pos + 2), *(pos + 3), *(pos + 4), *(pos + 5));
 		return;
@@ -473,29 +477,180 @@ void CheckGen()
 	for (int i = 0; i < TESTNUM; i++){
 
 		for (int j = 0; j < 2; j++){
-			cout << u2[i][j] << " ";
+			cout << u2[i][j] << "(" << nodeList[u2[i][j]].size()<<") ";
 		}
 		cout << endl;
 
 	}
-	for (int i = 0; i < TESTNUM; i++){
-
-		for (int j = 0; j < 4; j++){
-			cout << u4[i][j] << " ";
-		}
-		cout << endl;
-
-	}
-	for (int i = 0; i < TESTNUM; i++){
-
-		for (int j = 0; j < 6; j++){
-			cout << u6[i][j] << " ";
-		}
-		cout << endl;
-
-	}
+	
 	return;
 
+}
+typedef map< pair<int, int>, vector<int> > anl;
+anl Combine2Fre(anl a, anl b)
+{
+	anl result;
+	anl::iterator ai, bi;
+	bi = bi = b.begin();
+	for (ai = a.begin(); ai != a.end();){
+		for (; bi != b.end() && (*ai).first.first > (*bi).first.first; ++bi);
+			//int dlra = (*ai).first.first;
+			//int lrda = (*ai).first.second;
+			//int dlrb = (*bi).first.first;
+			//int lrdb = (*bi).first.second;
+			//vector<int> seta = (*ai).second;
+			//vector<int> setb = (*bi).second;
+		if (bi != b.end()){
+			if ((*ai).first.second > (*bi).first.second){
+				result[(*bi).first] = (*bi).second;
+				++bi;
+			}
+			else{
+				++ai;
+			}
+		}
+		else{
+			break;
+		}
+	}
+	return result;
+}
+vector<int> Intersection(vector<int> a, vector<int> b)
+{
+	vector<int> result;
+	vector<int>::iterator ai, bi;
+	bi = b.begin();
+	for (ai = a.begin(); ai != a.end();){
+		for (; bi != b.end() && (*bi) < (*ai); ++bi);
+		if (bi != b.end()){
+			if ((*bi) == (*ai)){
+				result.push_back((*bi));
+				++ai;
+				++bi;
+			}
+			else{
+				if ((*bi) > (*ai)){
+					++ai;
+				}
+			}
+		}
+		else{
+			break;
+		}
+	}
+	return result;
+}
+anl Combine2Unfre(anl a, anl b){
+	anl result;
+	anl::iterator ai, bi;
+	vector<int> inter;
+	bi = b.begin();
+	for (ai = a.begin(); ai != a.end();){
+		for (; bi != b.end() && (*ai).first.first < (*bi).first.first; ++ bi);
+		if (bi != b.end()){
+			if ((*ai).first.first == (*bi).first.first){//DLR相同
+				//交操作
+				inter = Intersection((*ai).second, (*bi).second);
+				result[(*ai).first] = inter;
+				++bi;
+				++ai;
+			}
+			else{
+				if ((*ai).first.first > (*bi).first.first){
+					++ai;
+				}
+			}
+		}
+		else{
+			break;
+		}
+	}
+	return result;
+}
+anl QueryFre(short *ori, int size){
+	anl a,b;
+	int have_son_relation = 0;
+	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
+		short ida = *(ori);
+		a = nodeList[ida];
+		for (int j = 1; j < size && have_son_relation; j++){
+			short idb = *(ori + j);
+			b = nodeList[idb];
+			a = Combine2Fre(a, b);
+			if (a.empty == true){
+				have_son_relation = 0;
+				break;
+			}
+		}
+	//}
+	if (have_son_relation == 0){
+		cout << "no record!" << endl;
+	}
+	return a;
+}
+anl QueryUnfre(short *ori, int size){
+	anl a, b;
+	int have_son_relation = 0;
+	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
+	short ida = *(ori);
+	a = nodeList[ida];
+	for (int j = 1; j < size && have_son_relation; j++){
+		short idb = *(ori + j);
+		b = nodeList[idb];
+		a = Combine2Unfre(a, b);
+		if (a.empty == true){
+			have_son_relation = 0;
+			break;
+		}
+	}
+	//}
+	if (have_son_relation == 0){
+		cout << "no record!" << endl;
+	}
+	return a;
+}
+anl Query(short *fre, int fsize,short *unfre,int usize){
+	anl a, b;
+	int have_son_relation = 0;
+	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
+	short ida = *(fre);
+	a = nodeList[ida];
+	for (int j = 1; j < fsize && have_son_relation; j++){
+		short idb = *(fre + j);
+		b = nodeList[idb];
+		a = Combine2Fre(a, b);
+		if (a.empty == true){
+			have_son_relation = 0;
+			break;
+		}
+	}
+	//}
+	if (have_son_relation != 0){
+		short idb = *(unfre);
+		b = nodeList[idb];
+		a = Combine2Fre(a, b);
+		for (int j = 1; j < usize && have_son_relation; j++){
+			idb = *(unfre + j);
+			b = nodeList[idb];
+			a = Combine2Unfre(a, b);
+			if (a.empty == true){
+				have_son_relation = 0;
+				break;
+			}
+		}
+	}
+	else{
+		cout << "no record!" << endl;
+	}
+	return a;
+}
+void CheckQueryAnswer(anl ans){
+	for (auto elem : ans){
+		for (int i = 0; i < elem.second.size(); i++){
+			cout << elem.second[i] << " ";
+		}
+		cout << endl;
+	}
 }
 int main(){
 	
@@ -510,24 +665,27 @@ int main(){
 	cout << "CountData Done------------" << endl;
 	RearrangeData();
 	cout << "RearrangeData Done--------" << endl;
-	//node * root = BuildTree(baseFre);
-	//cout << "BuildTree Done------------" << endl;
-	//DLR(root); 
-	//LRD(root);
+	node * root = BuildTree(baseFre);
+	cout << "BuildTree Done------------" << endl;
+	DLR(root); 
+	LRD(root);
 
-	//GenNodeList(root);
-	//cout << "GenNodeList Done----------" << endl;
+	GenNodeList(root);
+	cout << "GenNodeList Done----------" << endl;
 	SepFreUnfre(baseFre);
+	/*
 	cout << "fi:" << fi << ",ui" << ui << ",ri" << ri << endl;
 	cout << "ui:" << endl;
 	for (int i = 0; i < ui; i++){
 		cout << u[i]<<",";
 	}
 	cout << endl;
+	*/
 	GenFre(TESTNUM, f, 0, fi);
 	GenUnfre(TESTNUM, u, 0, ui);
 	GenRan(TESTNUM, r, 0, ri);
-	CheckGen();
+	//CheckGen();
+	cout << "GenTestData Done----------" << endl;
 	system("pause");
 	return 0;
 }
