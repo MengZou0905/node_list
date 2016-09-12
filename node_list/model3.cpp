@@ -10,14 +10,14 @@
 using namespace std;
 
 map<int, vector<int>> setData;
-
+#define TESTNUM 10
 float ReadFile(string path,float fre)
 {
 	ifstream in(path);
 	string line;
 	int setId;
 	int maxnum = 0;
-	for (setId = 0; getline(in, line); setId++){
+	for (setId = 0; getline(in, line) && setId<10; setId++){
 		istringstream li(line);
 		vector<int> temp;
 		int data;
@@ -32,11 +32,14 @@ float ReadFile(string path,float fre)
 int itemCount[1000] = { 0 };
 void CountData()
 {
+	//map<int, vector<int>> setData;
 	int total = 0;
 	memset(itemCount, 0, 1000 * sizeof(int));
-	for (int i = 0; i < setData.size(); i++)
-		for (int j = 0; j < setData[i].size(); j++)
-			itemCount[setData[i][j]] += 1;
+	for (auto i: setData){
+		for (auto j:i.second)
+			itemCount[j] += 1;
+	}
+		
 	
 	return;
 }
@@ -244,10 +247,10 @@ void CheckNodeList(){
 	}
 }
 
-#define TESTNUM 500
-int f[TESTNUM];
-int u[TESTNUM];
-int r[TESTNUM];
+
+int f[1000];
+int u[1000];
+int r[1000];
 int fi;
 int ui;
 int ri;
@@ -265,7 +268,7 @@ void SepFreUnfre(float baseFre)
 	fi = 0;
 	ui = 0;
 	ri = 0;
-	for (int i = 0; i < 1000; i++){
+	for (int i = 1; i < 1000; i++){
 		if (itemCount[i] != 0){
 			r[ri] = i;
 			ri++;
@@ -502,6 +505,9 @@ anl Combine2Fre(anl a, anl b)
 			//vector<int> setb = (*bi).second;
 		if (bi != b.end()){
 			if ((*ai).first.second > (*bi).first.second){
+				cout << "find son!" << endl;
+				cout << "a:" << (*ai).first.first << "," << (*ai).first.second << endl;
+				cout << "b:" << (*bi).first.first << "," << (*bi).first.second << endl;
 				result[(*bi).first] = (*bi).second;
 				++bi;
 			}
@@ -513,6 +519,7 @@ anl Combine2Fre(anl a, anl b)
 			break;
 		}
 	}
+	cout << "----------" << endl;
 	return result;
 }
 vector<int> Intersection(vector<int> a, vector<int> b)
@@ -576,16 +583,14 @@ anl QueryFre(short *ori, int size){
 		for (int j = 1; j < size && have_son_relation; j++){
 			short idb = *(ori + j);
 			b = nodeList[idb];
+			cout << "combine" << endl;
 			a = Combine2Fre(a, b);
-			if (a.empty == true){
+			if (a.empty() == true){
 				have_son_relation = 0;
 				break;
 			}
 		}
 	//}
-	if (have_son_relation == 0){
-		cout << "no record!" << endl;
-	}
 	return a;
 }
 anl QueryUnfre(short *ori, int size){
@@ -598,15 +603,12 @@ anl QueryUnfre(short *ori, int size){
 		short idb = *(ori + j);
 		b = nodeList[idb];
 		a = Combine2Unfre(a, b);
-		if (a.empty == true){
+		if (a.empty() == true){
 			have_son_relation = 0;
 			break;
 		}
 	}
 	//}
-	if (have_son_relation == 0){
-		cout << "no record!" << endl;
-	}
 	return a;
 }
 anl Query(short *fre, int fsize,short *unfre,int usize){
@@ -619,7 +621,7 @@ anl Query(short *fre, int fsize,short *unfre,int usize){
 		short idb = *(fre + j);
 		b = nodeList[idb];
 		a = Combine2Fre(a, b);
-		if (a.empty == true){
+		if (a.empty() == true){
 			have_son_relation = 0;
 			break;
 		}
@@ -633,25 +635,43 @@ anl Query(short *fre, int fsize,short *unfre,int usize){
 			idb = *(unfre + j);
 			b = nodeList[idb];
 			a = Combine2Unfre(a, b);
-			if (a.empty == true){
+			if (a.empty() == true){
 				have_son_relation = 0;
 				break;
 			}
 		}
 	}
-	else{
-		cout << "no record!" << endl;
-	}
+	
 	return a;
 }
 void CheckQueryAnswer(anl ans){
+	if (ans.empty() == true){
+		cout << "no record!" << endl;
+		return;
+	}
+	cout << "answer:" << endl;
 	for (auto elem : ans){
+		cout << "<" << elem.first.first << "," << elem.first.second << ">:";
 		for (int i = 0; i < elem.second.size(); i++){
 			cout << elem.second[i] << " ";
 		}
 		cout << endl;
 	}
 }
+void PrintFreNode(){
+	cout << "fi:" <<fi<< endl;
+	for (int i = 0; i < fi; i++){
+		cout << f[i] << ",";
+	}
+	cout << endl;
+}
+void PrintUnfreNode(){
+	cout << "ui:" << ui<< endl;
+	for (int i = 0; i < ui; i++){
+		cout << u[i] << ",";
+	}
+	cout << endl;
+} 
 int main(){
 	
 	map<string, float> data_fre = { { ".//data//mushroom.dat", 0.25 }, { ".//data//accidents.dat", 0.5 }, { ".//data//T10I4D100K.dat", 0.005 } };
@@ -673,19 +693,22 @@ int main(){
 	GenNodeList(root);
 	cout << "GenNodeList Done----------" << endl;
 	SepFreUnfre(baseFre);
-	/*
-	cout << "fi:" << fi << ",ui" << ui << ",ri" << ri << endl;
-	cout << "ui:" << endl;
-	for (int i = 0; i < ui; i++){
-		cout << u[i]<<",";
-	}
-	cout << endl;
-	*/
+	CheckNodeList();
+	PrintFreNode();
+	PrintUnfreNode();
+	
+	
 	GenFre(TESTNUM, f, 0, fi);
 	GenUnfre(TESTNUM, u, 0, ui);
 	GenRan(TESTNUM, r, 0, ri);
 	//CheckGen();
 	cout << "GenTestData Done----------" << endl;
+	
+	for (int i = 0; i < TESTNUM; i++){
+		cout << "query: " << f2[i][0] << "," << f2[i][1] << endl;
+		anl a = QueryFre(f2[i], 2);
+		CheckQueryAnswer(a);
+	}
 	system("pause");
 	return 0;
 }
