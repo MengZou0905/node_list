@@ -505,9 +505,9 @@ anl Combine2Fre(anl a, anl b)
 			//vector<int> setb = (*bi).second;
 		if (bi != b.end()){
 			if ((*ai).first.second > (*bi).first.second){
-				cout << "find son!" << endl;
-				cout << "a:" << (*ai).first.first << "," << (*ai).first.second << endl;
-				cout << "b:" << (*bi).first.first << "," << (*bi).first.second << endl;
+				//cout << "find son!" << endl;
+				//cout << "a:" << (*ai).first.first << "," << (*ai).first.second << endl;
+				//cout << "b:" << (*bi).first.first << "," << (*bi).first.second << endl;
 				result[(*bi).first] = (*bi).second;
 				++bi;
 			}
@@ -519,7 +519,7 @@ anl Combine2Fre(anl a, anl b)
 			break;
 		}
 	}
-	cout << "----------" << endl;
+	//cout << "----------" << endl;
 	return result;
 }
 vector<int> Intersection(vector<int> a, vector<int> b)
@@ -576,14 +576,17 @@ anl Combine2Unfre(anl a, anl b){
 }
 anl QueryFre(short *ori, int size){
 	anl a,b;
-	int have_son_relation = 0;
+	int have_son_relation = 1;
+
+	//cout << "into QueryFre"<< endl;
 	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
 		short ida = *(ori);
 		a = nodeList[ida];
 		for (int j = 1; j < size && have_son_relation; j++){
+			//cout << "into for" << endl;
 			short idb = *(ori + j);
 			b = nodeList[idb];
-			cout << "combine" << endl;
+			
 			a = Combine2Fre(a, b);
 			if (a.empty() == true){
 				have_son_relation = 0;
@@ -595,7 +598,7 @@ anl QueryFre(short *ori, int size){
 }
 anl QueryUnfre(short *ori, int size){
 	anl a, b;
-	int have_son_relation = 0;
+	int have_son_relation = 1;
 	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
 	short ida = *(ori);
 	a = nodeList[ida];
@@ -613,7 +616,7 @@ anl QueryUnfre(short *ori, int size){
 }
 anl Query(short *fre, int fsize,short *unfre,int usize){
 	anl a, b;
-	int have_son_relation = 0;
+	int have_son_relation = 1;
 	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
 	short ida = *(fre);
 	a = nodeList[ida];
