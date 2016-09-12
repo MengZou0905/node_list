@@ -6,6 +6,7 @@
 #include<string>
 #include<time.h> 
 #include<stdlib.h>
+#include<tuple>
 #include<algorithm>
 using namespace std;
 
@@ -17,7 +18,7 @@ float ReadFile(string path,float fre)
 	string line;
 	int setId;
 	int maxnum = 0;
-	for (setId = 0; getline(in, line) && setId<10; setId++){
+	for (setId = 0; getline(in, line) ; setId++){
 		istringstream li(line);
 		vector<int> temp;
 		int data;
@@ -30,6 +31,7 @@ float ReadFile(string path,float fre)
 }
 
 int itemCount[1000] = { 0 };
+float baseFre;
 void CountData()
 {
 	//map<int, vector<int>> setData;
@@ -77,7 +79,7 @@ public:
 	}
 };
 
-node* BuildTree(float fre)
+node* BuildTree()
 {
 	node *root = new node;
 	node *nodeCur = NULL;
@@ -89,7 +91,7 @@ node* BuildTree(float fre)
 				nodeCur = new node;
 				nodeCur->nodeRec[aset.second[i]].push_back(aset.first);
 				nodePre->son.push_back(nodeCur);
-				if (itemCount[aset.second[i]] < fre){
+				if (itemCount[aset.second[i]] < baseFre){
 					nodeCur->leaf = 1;
 				}
 				else{
@@ -103,7 +105,7 @@ node* BuildTree(float fre)
 					if ((**vi).nodeRec.find(aset.second[i])!=(**vi).nodeRec.end()){//id相同的节点已经插入树中，不需新建节点，只需在原有节点上添上set id
 						(**vi).nodeRec[aset.second[i]].push_back(aset.first);
 						find = 1;
-						if (itemCount[aset.second[i]] >= fre){
+						if (itemCount[aset.second[i]] >= baseFre){
 							nodePre = (*vi);
 						}
 						break;
@@ -112,7 +114,7 @@ node* BuildTree(float fre)
 				if (find == 0){//此id节点还没有插入到树中,需要判断此id是不是非频繁的。
 					int findLeaf = 0;
 
-					if (itemCount[aset.second[i]] < fre){//如果当前id是非频繁项，要找当前的son中有没有叶子节点，没有就新建，有就直接添加id
+					if (itemCount[aset.second[i]] < baseFre){//如果当前id是非频繁项，要找当前的son中有没有叶子节点，没有就新建，有就直接添加id
 						vector<node *>::iterator vii;
 						for (vii = nodePre->son.begin(); vii != nodePre->son.end(); ++vii){
 							if ((**vii).leaf == 1){
@@ -255,11 +257,6 @@ int fi;
 int ui;
 int ri;
 
-bool CompareOnNodeList(int a, int b)
-{
-	return (nodeList[a].size() < nodeList[b].size());
-}
-
 void SepFreUnfre(float baseFre)
 {
 	memset(f, 0, sizeof(f));
@@ -301,7 +298,10 @@ short r2[TESTNUM][2];
 short r4[TESTNUM][4];
 short r6[TESTNUM][6];
 
-
+bool CompareOnNodeList(int a, int b)
+{
+	return (nodeList[a].size() < nodeList[b].size());
+}
 void Gen2(int count, int* ori, int left, int right, short*pos){
 	//Gen2:生成两个不重复的随机数，存入pos指向的数组中
 	//count:已经成功生成的随机数
@@ -448,9 +448,25 @@ void GenUnfre(int n, int *ori, int left, int right){
 void GenRan(int n, int *ori, int left, int right){
 	
 	for (int i = 0; i < n;){
-		Gen2(0, ori, left, right, r2[i]);
+		Gen2(0, ori, left, right, r2[i]);//已经按node-list由短到长排好序
+		vector<int> tempv;
+		for (int k = 0; k < 2; k++){
+			if (itemCount[r2[i][k]] >= baseFre){
+				tempv.push_back(r2[i][k]);
+			}
+		}
+		for (int k = 0; k < 2; k++){
+			if (itemCount[r2[i][k]] < baseFre){
+				tempv.push_back(r2[i][k]);
+			}
+		}
+		int kk = 0;
+		for (vector<int>::iterator vi = tempv.begin(); vi != tempv.end(); ++vi,++kk){
+			r2[i][kk] = (*vi);
+		}
+		cur2 = make_tuple(r2[i][0],r2[i][1]);
 		if (aset2.find(cur2) == aset2.end()){
-			//cout << "GenRan:" << i << endl;
+			//将fre项排在前面，unfre项排在后面，两部分都是node-list短的在前
 			i++;
 			aset2[cur2] = 1;
 		}
@@ -459,6 +475,22 @@ void GenRan(int n, int *ori, int left, int right){
 	aset2.clear();
 	for (int i = 0; i < n;){
 		Gen4(0, ori, left, right, r4[i]);
+		vector<int> tempv;
+		for (int k = 0; k < 4; k++){
+			if (itemCount[r4[i][k]] >= baseFre){
+				tempv.push_back(r4[i][k]);
+			}
+		}
+		for (int k = 0; k < 4; k++){
+			if (itemCount[r4[i][k]] < baseFre){
+				tempv.push_back(r4[i][k]);
+			}
+		}
+		int kk = 0;
+		for (vector<int>::iterator vi = tempv.begin(); vi != tempv.end(); ++vi, ++kk){
+			r4[i][kk] = (*vi);
+		}
+		cur4 = make_tuple(r4[i][0], r4[i][1], r4[i][2], r4[i][3]);
 		if (aset4.find(cur4) == aset4.end()){
 			i++;
 			aset4[cur4] = 1;
@@ -467,6 +499,22 @@ void GenRan(int n, int *ori, int left, int right){
 	aset4.clear();
 	for (int i = 0; i < n;){
 		Gen6(0, ori, left, right, r6[i]);
+		vector<int> tempv;
+		for (int k = 0; k < 6; k++){
+			if (itemCount[r6[i][k]] >= baseFre){
+				tempv.push_back(r6[i][k]);
+			}
+		}
+		for (int k = 0; k < 6; k++){
+			if (itemCount[r6[i][k]] < baseFre){
+				tempv.push_back(r6[i][k]);
+			}
+		}
+		int kk = 0;
+		for (vector<int>::iterator vi = tempv.begin(); vi != tempv.end(); ++vi, ++kk){
+			r6[i][kk] = (*vi);
+		}
+		cur6 = make_tuple(r6[i][0], r6[i][1], r6[i][2], r6[i][3], r6[i][4], r6[i][5]);
 		if (aset6.find(cur6) == aset6.end()){
 			i++;
 			aset6[cur6] = 1;
@@ -479,8 +527,8 @@ void CheckGen()
 {
 	for (int i = 0; i < TESTNUM; i++){
 
-		for (int j = 0; j < 2; j++){
-			cout << u2[i][j] << "(" << nodeList[u2[i][j]].size()<<") ";
+		for (int j = 0; j < 4; j++){
+			cout << r4[i][j] << ":" << itemCount[r4[i][j]] << "(" << nodeList[r4[i][j]].size() << ") ";
 		}
 		cout << endl;
 
@@ -494,32 +542,33 @@ anl Combine2Fre(anl a, anl b)
 {
 	anl result;
 	anl::iterator ai, bi;
-	bi = bi = b.begin();
-	for (ai = a.begin(); ai != a.end();){
-		for (; bi != b.end() && (*ai).first.first > (*bi).first.first; ++bi);
+	for (int i = 0; i<2; i++){
+		bi = bi = b.begin();
+		for (ai = a.begin(); ai != a.end();){
+			for (; bi != b.end() && (*ai).first.first >(*bi).first.first; ++bi);
 			//int dlra = (*ai).first.first;
 			//int lrda = (*ai).first.second;
 			//int dlrb = (*bi).first.first;
 			//int lrdb = (*bi).first.second;
 			//vector<int> seta = (*ai).second;
 			//vector<int> setb = (*bi).second;
-		if (bi != b.end()){
-			if ((*ai).first.second > (*bi).first.second){
-				//cout << "find son!" << endl;
-				//cout << "a:" << (*ai).first.first << "," << (*ai).first.second << endl;
-				//cout << "b:" << (*bi).first.first << "," << (*bi).first.second << endl;
-				result[(*bi).first] = (*bi).second;
-				++bi;
+			if (bi != b.end()){
+				if ((*ai).first.second > (*bi).first.second){
+					result[(*bi).first] = (*bi).second;
+					++bi;
+				}
+				else{
+					++ai;
+				}
 			}
 			else{
-				++ai;
+				break;
 			}
 		}
-		else{
-			break;
-		}
+		swap(a, b);
 	}
-	//cout << "----------" << endl;
+	
+	
 	return result;
 }
 vector<int> Intersection(vector<int> a, vector<int> b)
@@ -614,10 +663,22 @@ anl QueryUnfre(short *ori, int size){
 	//}
 	return a;
 }
-anl Query(short *fre, int fsize,short *unfre,int usize){
+int FindSep(short *ori, int size){
+	int sep ;
+	for (sep = 0; sep < size; sep++){
+		if (*(ori + sep) < baseFre){
+			break;
+		}
+	}
+	//sep == 0：全是frequent id
+	//sep == size：全是unfre id
+	//else,数组里有fre，也有unfre
+	return sep;
+}
+anl QueryRan(short *fre, int fsize,short *unfre,int usize){
 	anl a, b;
 	int have_son_relation = 1;
-	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
+	
 	short ida = *(fre);
 	a = nodeList[ida];
 	for (int j = 1; j < fsize && have_son_relation; j++){
@@ -629,7 +690,7 @@ anl Query(short *fre, int fsize,short *unfre,int usize){
 			break;
 		}
 	}
-	//}
+	
 	if (have_son_relation != 0){
 		short idb = *(unfre);
 		b = nodeList[idb];
@@ -647,6 +708,23 @@ anl Query(short *fre, int fsize,short *unfre,int usize){
 	
 	return a;
 }
+anl Query(short *ori, int size){
+	anl a;
+	int sep;
+
+	sep = FindSep(ori, size);
+	if (sep == 0)
+		a = QueryFre(ori, size);
+	else{
+		if (sep == size){
+			a = QueryUnfre(ori, size);
+		}
+		else{
+			a = QueryRan(ori, sep, ori + sep, size - sep);
+		}
+	}
+	return a;
+}
 void CheckQueryAnswer(anl ans){
 	if (ans.empty() == true){
 		cout << "no record!" << endl;
@@ -654,12 +732,13 @@ void CheckQueryAnswer(anl ans){
 	}
 	cout << "answer:" << endl;
 	for (auto elem : ans){
-		cout << "<" << elem.first.first << "," << elem.first.second << ">:";
+		//cout << "<" << elem.first.first << "," << elem.first.second << ">:";
 		for (int i = 0; i < elem.second.size(); i++){
 			cout << elem.second[i] << " ";
 		}
-		cout << endl;
+		//cout << endl;
 	}
+	cout << endl;
 }
 void PrintFreNode(){
 	cout << "fi:" <<fi<< endl;
@@ -675,12 +754,13 @@ void PrintUnfreNode(){
 	}
 	cout << endl;
 } 
+
 int main(){
 	
 	map<string, float> data_fre = { { ".//data//mushroom.dat", 0.25 }, { ".//data//accidents.dat", 0.5 }, { ".//data//T10I4D100K.dat", 0.005 } };
 	string path = ".//data//mushroom.dat";
 	float fre = 0.25;
-	float baseFre;
+	
 	
 	baseFre = ReadFile(path, fre);
 	cout << "频繁项最低支持度：" << baseFre << endl;
@@ -688,7 +768,7 @@ int main(){
 	cout << "CountData Done------------" << endl;
 	RearrangeData();
 	cout << "RearrangeData Done--------" << endl;
-	node * root = BuildTree(baseFre);
+	node * root = BuildTree();
 	cout << "BuildTree Done------------" << endl;
 	DLR(root); 
 	LRD(root);
@@ -696,22 +776,24 @@ int main(){
 	GenNodeList(root);
 	cout << "GenNodeList Done----------" << endl;
 	SepFreUnfre(baseFre);
-	CheckNodeList();
+	//CheckNodeList();
 	PrintFreNode();
-	PrintUnfreNode();
+	//PrintUnfreNode();
 	
 	
 	GenFre(TESTNUM, f, 0, fi);
 	GenUnfre(TESTNUM, u, 0, ui);
 	GenRan(TESTNUM, r, 0, ri);
-	//CheckGen();
+	CheckGen();
 	cout << "GenTestData Done----------" << endl;
-	
+	/*
 	for (int i = 0; i < TESTNUM; i++){
-		cout << "query: " << f2[i][0] << "," << f2[i][1] << endl;
-		anl a = QueryFre(f2[i], 2);
+		cout << "query: " << r2[i][0] << "," << r2[i][1] << endl;
+		anl a = QueryUnfre(r2[i], 2);
 		CheckQueryAnswer(a);
 	}
+	*/
+	
 	system("pause");
 	return 0;
 }
