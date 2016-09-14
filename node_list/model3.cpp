@@ -18,7 +18,7 @@ float ReadFile(string path,float fre)
 	string line;
 	int setId;
 	int maxnum = 0;
-	for (setId = 0; getline(in, line) ; setId++){
+	for (setId = 0; getline(in, line) && setId<20; setId++){
 		istringstream li(line);
 		vector<int> temp;
 		int data;
@@ -666,12 +666,12 @@ anl QueryUnfre(short *ori, int size){
 int FindSep(short *ori, int size){
 	int sep ;
 	for (sep = 0; sep < size; sep++){
-		if (*(ori + sep) < baseFre){
+		if (itemCount[*(ori + sep)] < baseFre){
 			break;
 		}
 	}
-	//sep == 0：全是frequent id
-	//sep == size：全是unfre id
+	//sep == size：全是frequent id
+	//sep == 0：全是unfre id
 	//else,数组里有fre，也有unfre
 	return sep;
 }
@@ -713,13 +713,19 @@ anl Query(short *ori, int size){
 	int sep;
 
 	sep = FindSep(ori, size);
-	if (sep == 0)
+	cout << "sep:" << sep << endl;
+	cout << "size:" << size << endl;
+	if (sep == size){
+		cout << "using QueryFre" << endl;
 		a = QueryFre(ori, size);
+	}
 	else{
-		if (sep == size){
+		if (sep == 0){
+			cout << "using QueryUnfre" << endl;
 			a = QueryUnfre(ori, size);
 		}
 		else{
+			cout << "QueryRan" << endl;
 			a = QueryRan(ori, sep, ori + sep, size - sep);
 		}
 	}
@@ -776,9 +782,9 @@ int main(){
 	GenNodeList(root);
 	cout << "GenNodeList Done----------" << endl;
 	SepFreUnfre(baseFre);
-	//CheckNodeList();
+	CheckNodeList();
 	PrintFreNode();
-	//PrintUnfreNode();
+	PrintUnfreNode();
 	
 	
 	GenFre(TESTNUM, f, 0, fi);
@@ -786,13 +792,13 @@ int main(){
 	GenRan(TESTNUM, r, 0, ri);
 	CheckGen();
 	cout << "GenTestData Done----------" << endl;
-	/*
+	
 	for (int i = 0; i < TESTNUM; i++){
-		cout << "query: " << r2[i][0] << "," << r2[i][1] << endl;
-		anl a = QueryUnfre(r2[i], 2);
+		cout << "query: " << r4[i][0] << "," << r4[i][1] << "," << r4[i][2] << "," << r4[i][3] << endl;
+		anl a = Query(r4[i], 4);
 		CheckQueryAnswer(a);
 	}
-	*/
+	
 	
 	system("pause");
 	return 0;
