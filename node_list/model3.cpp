@@ -19,16 +19,38 @@ float ReadFile(string path,float fre)
 	int setId;
 	int maxnum = 0;
 	for (setId = 0; getline(in, line) && setId<20; setId++){
+		//cout << setId << ":";
 		istringstream li(line);
 		vector<int> temp;
 		int data;
 		while (li >> data) {
 			setData[setId].push_back(data);
+			//cout << data << " ";
 		}
-
+		//cout << endl;
 	}
 	return setId*fre;
 }
+map<int, vector<int>> invertedList;
+void BuildInvertedList(){
+	for (auto elem : setData){
+		vector<int>::iterator vi;
+		for (vi = elem.second.begin(); vi != elem.second.end(); vi++){
+			invertedList[(*vi)].push_back(elem.first);
+		}
+	}
+}
+void CheckInvertedList(){
+	for (auto elem : invertedList){
+		cout << elem.first << ":";
+		vector<int>::iterator vi;
+		for (vi = elem.second.begin(); vi != elem.second.end(); vi++){
+			cout<<(*vi)<<" ";
+		}
+		cout << endl;
+	}
+}
+
 
 int itemCount[1000] = { 0 };
 float baseFre;
@@ -542,8 +564,8 @@ anl Combine2Fre(anl a, anl b)
 {
 	anl result;
 	anl::iterator ai, bi;
-	for (int i = 0; i<2; i++){
-		bi = bi = b.begin();
+	for (int i = 0; i<2 && result.empty() == true; i++){
+		bi = b.begin();
 		for (ai = a.begin(); ai != a.end();){
 			for (; bi != b.end() && (*ai).first.first >(*bi).first.first; ++bi);
 			//int dlra = (*ai).first.first;
@@ -625,40 +647,34 @@ anl Combine2Unfre(anl a, anl b){
 }
 anl QueryFre(short *ori, int size){
 	anl a,b;
-	int have_son_relation = 1;
+	//int have_son_relation = 1;
 
-	//cout << "into QueryFre"<< endl;
-	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
 		short ida = *(ori);
 		a = nodeList[ida];
-		for (int j = 1; j < size && have_son_relation; j++){
-			//cout << "into for" << endl;
+		//for (int j = 1; j < size && have_son_relation; j++){
+		for (int j = 1; j < size && a.empty()!= true; j++){
 			short idb = *(ori + j);
 			b = nodeList[idb];
-			
 			a = Combine2Fre(a, b);
+			/*
 			if (a.empty() == true){
 				have_son_relation = 0;
 				break;
 			}
+			*/
 		}
 	//}
 	return a;
 }
 anl QueryUnfre(short *ori, int size){
 	anl a, b;
-	int have_son_relation = 1;
 	//for (int i = 0; i < TESTNUM && have_son_relation; i++){
 	short ida = *(ori);
 	a = nodeList[ida];
-	for (int j = 1; j < size && have_son_relation; j++){
+	for (int j = 1; j < size && a.empty() != true; j++){
 		short idb = *(ori + j);
 		b = nodeList[idb];
 		a = Combine2Unfre(a, b);
-		if (a.empty() == true){
-			have_son_relation = 0;
-			break;
-		}
 	}
 	//}
 	return a;
@@ -677,32 +693,23 @@ int FindSep(short *ori, int size){
 }
 anl QueryRan(short *fre, int fsize,short *unfre,int usize){
 	anl a, b;
-	int have_son_relation = 1;
 	
 	short ida = *(fre);
 	a = nodeList[ida];
-	for (int j = 1; j < fsize && have_son_relation; j++){
+	for (int j = 1; j < fsize && a.empty() != true; j++){
 		short idb = *(fre + j);
 		b = nodeList[idb];
 		a = Combine2Fre(a, b);
-		if (a.empty() == true){
-			have_son_relation = 0;
-			break;
-		}
 	}
 	
-	if (have_son_relation != 0){
+	if (a.empty() != true){
 		short idb = *(unfre);
 		b = nodeList[idb];
 		a = Combine2Fre(a, b);
-		for (int j = 1; j < usize && have_son_relation; j++){
+		for (int j = 1; j < usize && a.empty() != true; j++){
 			idb = *(unfre + j);
 			b = nodeList[idb];
 			a = Combine2Unfre(a, b);
-			if (a.empty() == true){
-				have_son_relation = 0;
-				break;
-			}
 		}
 	}
 	
@@ -730,6 +737,20 @@ anl Query(short *ori, int size){
 		}
 	}
 	return a;
+}
+
+vector<int> QueryInvertedList(short *ori, int size){
+	vector<int> a, b;
+	
+	short ida = *(ori);
+	a = invertedList[ida];
+	for (int j = 1; j < size && a.empty() != true; j++){
+		short idb = *(ori + j);
+		b = invertedList[idb];
+		a = Intersection(a, b);
+	}
+	return a;
+
 }
 void CheckQueryAnswer(anl ans){
 	if (ans.empty() == true){
@@ -770,6 +791,9 @@ int main(){
 	
 	baseFre = ReadFile(path, fre);
 	cout << "频繁项最低支持度：" << baseFre << endl;
+	BuildInvertedList();
+	CheckInvertedList();
+	
 	CountData();
 	cout << "CountData Done------------" << endl;
 	RearrangeData();
@@ -795,8 +819,12 @@ int main(){
 	
 	for (int i = 0; i < TESTNUM; i++){
 		cout << "query: " << r4[i][0] << "," << r4[i][1] << "," << r4[i][2] << "," << r4[i][3] << endl;
-		anl a = Query(r4[i], 4);
-		CheckQueryAnswer(a);
+		vector<int> a = QueryInvertedList(r4[i], 4);
+		for (auto elem : a){
+			cout << elem << " ";
+		}
+		cout << endl;
+		//CheckQueryAnswer(a);
 	}
 	
 	
