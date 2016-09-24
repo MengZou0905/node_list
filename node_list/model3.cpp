@@ -8,17 +8,18 @@
 #include<stdlib.h>
 #include<tuple>
 #include<algorithm>
+#include<time.h>
 using namespace std;
 
 map<int, vector<int>> setData;
-#define TESTNUM 10
+#define TESTNUM 250
 float ReadFile(string path,float fre)
 {
 	ifstream in(path);
 	string line;
 	int setId;
 	int maxnum = 0;
-	for (setId = 0; getline(in, line) && setId<20; setId++){
+	for (setId = 0; getline(in, line); setId++){
 		//cout << setId << ":";
 		istringstream li(line);
 		vector<int> temp;
@@ -338,8 +339,10 @@ void Gen2(int count, int* ori, int left, int right, short*pos){
 			//cout << *(pos + i) << ",";
 			i++;
 		}
-		//sort(setData[i].begin(), setData[i].end(), compare);
-		sort(pos, pos+2,CompareOnNodeList);
+		//按照node-list由短到长排列
+		//sort(pos, pos+2,CompareOnNodeList);
+		//按照support由多到少排列
+		sort(pos, pos + 2, compare);
 		//cout << endl;
 		arec.clear();
 		cur2 = make_tuple(*pos, *(pos + 1));
@@ -365,7 +368,10 @@ void Gen4(int count, int *ori, int left, int right, short*pos){
 			*(pos + i) = *(ori + elem.first);
 			i++;
 		}
-		sort(pos, pos + 4, CompareOnNodeList);
+		//按照node-list由短到长排列
+		//sort(pos, pos+4,CompareOnNodeList);
+		//按照support由多到少排列
+		sort(pos, pos + 4, compare);
 		arec.clear();
 		cur4 = make_tuple(*pos, *(pos + 1), *(pos + 2), *(pos + 3));
 		return;
@@ -390,7 +396,10 @@ void Gen6(int count, int *ori, int left, int right, short*pos){
 			*(pos + i) = *(ori + elem.first);
 			i++;
 		}
-		sort(pos, pos + 6, CompareOnNodeList);
+		//按照node-list由短到长排列
+		//sort(pos, pos+6,CompareOnNodeList);
+		//按照support由多到少排列
+		sort(pos, pos + 6, compare);
 		arec.clear();
 		cur6 = make_tuple(*pos, *(pos + 1), *(pos + 2), *(pos + 3), *(pos + 4), *(pos + 5));
 		return;
@@ -470,7 +479,7 @@ void GenUnfre(int n, int *ori, int left, int right){
 void GenRan(int n, int *ori, int left, int right){
 	
 	for (int i = 0; i < n;){
-		Gen2(0, ori, left, right, r2[i]);//已经按node-list由短到长排好序
+		Gen2(0, ori, left, right, r2[i]);//已经按support由多到少排好序
 		vector<int> tempv;
 		for (int k = 0; k < 2; k++){
 			if (itemCount[r2[i][k]] >= baseFre){
@@ -488,7 +497,7 @@ void GenRan(int n, int *ori, int left, int right){
 		}
 		cur2 = make_tuple(r2[i][0],r2[i][1]);
 		if (aset2.find(cur2) == aset2.end()){
-			//将fre项排在前面，unfre项排在后面，两部分都是node-list短的在前
+			//将fre项排在前面，unfre项排在后面，两部分都是support多的在前
 			i++;
 			aset2[cur2] = 1;
 		}
@@ -564,7 +573,7 @@ anl Combine2Fre(anl a, anl b)
 {
 	anl result;
 	anl::iterator ai, bi;
-	for (int i = 0; i<2 && result.empty() == true; i++){
+	//for (int i = 0; i<2 && result.empty() == true; i++){//适用于查询项按照node-list由短到长排列的情况，防止查询项“子父”顺序导致查询结果为空
 		bi = b.begin();
 		for (ai = a.begin(); ai != a.end();){
 			for (; bi != b.end() && (*ai).first.first >(*bi).first.first; ++bi);
@@ -587,8 +596,8 @@ anl Combine2Fre(anl a, anl b)
 				break;
 			}
 		}
-		swap(a, b);
-	}
+		//swap(a, b);//适用于查询项按照node-list由短到长排列的情况，防止查询项“子父”顺序导致查询结果为空
+	//}//适用于查询项按照node-list由短到长排列的情况，防止查询项“子父”顺序导致查询结果为空
 	
 	
 	return result;
@@ -720,19 +729,19 @@ anl Query(short *ori, int size){
 	int sep;
 
 	sep = FindSep(ori, size);
-	cout << "sep:" << sep << endl;
-	cout << "size:" << size << endl;
+	//cout << "sep:" << sep << endl;
+	//cout << "size:" << size << endl;
 	if (sep == size){
-		cout << "using QueryFre" << endl;
+		//cout << "using QueryFre" << endl;
 		a = QueryFre(ori, size);
 	}
 	else{
 		if (sep == 0){
-			cout << "using QueryUnfre" << endl;
+			//cout << "using QueryUnfre" << endl;
 			a = QueryUnfre(ori, size);
 		}
 		else{
-			cout << "QueryRan" << endl;
+			//cout << "QueryRan" << endl;
 			a = QueryRan(ori, sep, ori + sep, size - sep);
 		}
 	}
@@ -784,15 +793,18 @@ void PrintUnfreNode(){
 
 int main(){
 	
-	map<string, float> data_fre = { { ".//data//mushroom.dat", 0.25 }, { ".//data//accidents.dat", 0.5 }, { ".//data//T10I4D100K.dat", 0.005 } };
-	string path = ".//data//mushroom.dat";
-	float fre = 0.25;
-	
-	
+	//map<string, float> data_fre = { { ".//data//mushroom.dat", 0.25 }, { ".//data//accidents.dat", 0.5 }, { ".//data//T10I4D100K.dat", 0.005 } };
+	string path = ".//data//accidents.dat";
+	float fre = 0.5;
+	cout << "当前数据集: " << path << endl << "frequent creterior: " << fre << endl;
+	//计时声明
+	clock_t start, finish;
+	double totaltime;
+
 	baseFre = ReadFile(path, fre);
-	cout << "频繁项最低支持度：" << baseFre << endl;
+	cout << "当前数据集频繁项最低支持度：" << baseFre << endl;
 	BuildInvertedList();
-	CheckInvertedList();
+	//CheckInvertedList();
 	
 	CountData();
 	cout << "CountData Done------------" << endl;
@@ -806,28 +818,109 @@ int main(){
 	GenNodeList(root);
 	cout << "GenNodeList Done----------" << endl;
 	SepFreUnfre(baseFre);
-	CheckNodeList();
-	PrintFreNode();
-	PrintUnfreNode();
+	//CheckNodeList();
+	//PrintFreNode();
+	//PrintUnfreNode();
 	
-	
+	cout << "频繁单项数量:" << fi << endl;
+	cout << "非频繁单项数量:" << ui << endl;
+	cout << "测试集大小:" << TESTNUM << endl;
 	GenFre(TESTNUM, f, 0, fi);
 	GenUnfre(TESTNUM, u, 0, ui);
 	GenRan(TESTNUM, r, 0, ri);
-	CheckGen();
+	//CheckGen();
 	cout << "GenTestData Done----------" << endl;
-	
+
+	//计时开始
+	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		cout << "query: " << r4[i][0] << "," << r4[i][1] << "," << r4[i][2] << "," << r4[i][3] << endl;
-		vector<int> a = QueryInvertedList(r4[i], 4);
-		for (auto elem : a){
-			cout << elem << " ";
-		}
-		cout << endl;
-		//CheckQueryAnswer(a);
+		vector<int> ir2 = QueryInvertedList(r2[i], 2);
 	}
-	
-	
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nir2的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		vector<int> ir4 = QueryInvertedList(r4[i], 4);
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nir4的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		vector<int> ir6 = QueryInvertedList(r6[i], 6);
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nir6的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		vector<int> if2 = QueryInvertedList(f2[i], 2);
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nif2的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		vector<int> if4 = QueryInvertedList(f4[i], 4);
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nif4的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		vector<int> if6 = QueryInvertedList(f6[i], 6);
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nif6的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		vector<int> iu2 = QueryInvertedList(u2[i], 2);
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\niu2的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		vector<int> iu4 = QueryInvertedList(u4[i], 4);
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\niu4的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		vector<int> iu6 = QueryInvertedList(u6[i], 6);
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\niu6的运行时间为" << totaltime << "秒！" << endl;
+
 	system("pause");
 	return 0;
 }
