@@ -796,45 +796,50 @@ int main(){
 	//map<string, float> data_fre = { { ".//data//mushroom.dat", 0.25 }, { ".//data//accidents.dat", 0.5 }, { ".//data//T10I4D100K.dat", 0.005 } };
 	string path = ".//data//accidents.dat";
 	float fre = 0.5;
-	cout << "当前数据集: " << path << endl << "frequent creterior: " << fre << endl;
+	
 	//计时声明
 	clock_t start, finish;
 	double totaltime;
 
 	baseFre = ReadFile(path, fre);
-	cout << "当前数据集频繁项最低支持度：" << baseFre << endl;
+	
 	BuildInvertedList();
 	//CheckInvertedList();
 	
 	CountData();
-	cout << "CountData Done------------" << endl;
+	//cout << "CountData Done------------" << endl;
 	RearrangeData();
-	cout << "RearrangeData Done--------" << endl;
+	//cout << "RearrangeData Done--------" << endl;
 	node * root = BuildTree();
-	cout << "BuildTree Done------------" << endl;
+	//cout << "BuildTree Done------------" << endl;
 	DLR(root); 
 	LRD(root);
 
 	GenNodeList(root);
-	cout << "GenNodeList Done----------" << endl;
+	//cout << "GenNodeList Done----------" << endl;
 	SepFreUnfre(baseFre);
 	//CheckNodeList();
 	//PrintFreNode();
 	//PrintUnfreNode();
-	
+	cout << "----------------------------------------------------------------" << endl;
+	cout << "当前数据集: " << path << endl << "frequent creterior: " << fre << endl;
+	cout << "当前数据集频繁项最低支持度：" << baseFre << endl;
 	cout << "频繁单项数量:" << fi << endl;
 	cout << "非频繁单项数量:" << ui << endl;
 	cout << "测试集大小:" << TESTNUM << endl;
+
 	GenFre(TESTNUM, f, 0, fi);
 	GenUnfre(TESTNUM, u, 0, ui);
 	GenRan(TESTNUM, r, 0, ri);
 	//CheckGen();
-	cout << "GenTestData Done----------" << endl;
-
+	//cout << "GenTestData Done----------" << endl;
+	
+	cout <<endl<< "倒排测试" ;
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> ir2 = QueryInvertedList(r2[i], 2);
+		vector<int> ir2 = QueryInvertedList(r2[i], 2);//测试倒排表用时
+		//anl nr2 = Query(r2[i], 2);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
@@ -844,27 +849,30 @@ int main(){
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> ir4 = QueryInvertedList(r4[i], 4);
+		vector<int> ir4 = QueryInvertedList(r4[i], 4);//测试倒排表用时
+		//anl nr4 = Query(r4[i], 4);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
-	cout << "\nir4的运行时间为" << totaltime << "秒！" << endl;
+	cout << "ir4的运行时间为" << totaltime << "秒！" << endl;
 
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> ir6 = QueryInvertedList(r6[i], 6);
+		vector<int> ir6 = QueryInvertedList(r6[i], 6);//测试倒排表用时
+		//anl nr6 = Query(r6[i], 6);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
-	cout << "\nir6的运行时间为" << totaltime << "秒！" << endl;
+	cout << "ir6的运行时间为" << totaltime << "秒！" << endl;
 
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> if2 = QueryInvertedList(f2[i], 2);
+		vector<int> if2 = QueryInvertedList(f2[i], 2);//测试倒排表用时
+		//anl nf2 = QueryFre(f2[i], 2);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
@@ -874,27 +882,30 @@ int main(){
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> if4 = QueryInvertedList(f4[i], 4);
+		vector<int> if4 = QueryInvertedList(f4[i], 4);//测试倒排表用时
+		//anl nf4 = QueryFre(f4[i], 4);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
-	cout << "\nif4的运行时间为" << totaltime << "秒！" << endl;
+	cout << "if4的运行时间为" << totaltime << "秒！" << endl;
 
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> if6 = QueryInvertedList(f6[i], 6);
+		vector<int> if6 = QueryInvertedList(f6[i], 6);//测试倒排表用时
+		//anl nf6 = QueryFre(f6[i], 6);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
-	cout << "\nif6的运行时间为" << totaltime << "秒！" << endl;
+	cout << "if6的运行时间为" << totaltime << "秒！" << endl;
 
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> iu2 = QueryInvertedList(u2[i], 2);
+		vector<int> iu2 = QueryInvertedList(u2[i], 2);//测试倒排表用时
+		//anl nu2 = QueryUnfre(u2[i], 2);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
@@ -904,22 +915,125 @@ int main(){
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> iu4 = QueryInvertedList(u4[i], 4);
+		vector<int> iu4 = QueryInvertedList(u4[i], 4);//测试倒排表用时
+		//anl nu4 = QueryUnfre(u4[i], 4);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
-	cout << "\niu4的运行时间为" << totaltime << "秒！" << endl;
+	cout << "iu4的运行时间为" << totaltime << "秒！" << endl;
 
 	//计时开始
 	start = clock();
 	for (int i = 0; i < TESTNUM; i++){
-		vector<int> iu6 = QueryInvertedList(u6[i], 6);
+		vector<int> iu6 = QueryInvertedList(u6[i], 6);//测试倒排表用时
+		//anl nu6 = QueryUnfre(u6[i], 6);//测试node-list算法用时
 	}
 	//计时结束
 	finish = clock();
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
-	cout << "\niu6的运行时间为" << totaltime << "秒！" << endl;
+	cout << "iu6的运行时间为" << totaltime << "秒！" << endl;
+
+
+	cout << endl<<"node-list测试：";
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> ir2 = QueryInvertedList(r2[i], 2);//测试倒排表用时
+		anl nr2 = Query(r2[i], 2);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nnr2的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> ir4 = QueryInvertedList(r4[i], 4);//测试倒排表用时
+		anl nr4 = Query(r4[i], 4);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "nr4的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> ir6 = QueryInvertedList(r6[i], 6);//测试倒排表用时
+		anl nr6 = Query(r6[i], 6);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "nr6的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> if2 = QueryInvertedList(f2[i], 2);//测试倒排表用时
+		anl nf2 = QueryFre(f2[i], 2);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nnf2的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> if4 = QueryInvertedList(f4[i], 4);//测试倒排表用时
+		anl nf4 = QueryFre(f4[i], 4);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "nf4的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> if6 = QueryInvertedList(f6[i], 6);//测试倒排表用时
+		anl nf6 = QueryFre(f6[i], 6);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "nf6的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> iu2 = QueryInvertedList(u2[i], 2);//测试倒排表用时
+		anl nu2 = QueryUnfre(u2[i], 2);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "\nnu2的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> iu4 = QueryInvertedList(u4[i], 4);//测试倒排表用时
+		anl nu4 = QueryUnfre(u4[i], 4);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "nu4的运行时间为" << totaltime << "秒！" << endl;
+
+	//计时开始
+	start = clock();
+	for (int i = 0; i < TESTNUM; i++){
+		//vector<int> iu6 = QueryInvertedList(u6[i], 6);//测试倒排表用时
+		anl nu6 = QueryUnfre(u6[i], 6);//测试node-list算法用时
+	}
+	//计时结束
+	finish = clock();
+	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+	cout << "nu6的运行时间为" << totaltime << "秒！" << endl;
 
 	system("pause");
 	return 0;
