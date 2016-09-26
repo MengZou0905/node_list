@@ -42,6 +42,13 @@ void BuildInvertedList(){
 	}
 }
 void CheckInvertedList(){
+	float evaLen = 0;
+	for (auto elem : invertedList){
+		evaLen += elem.second.size();
+	}
+	evaLen = (float)evaLen/invertedList.size();
+	cout << "倒排表平均长度：" << evaLen << endl;
+	/*
 	for (auto elem : invertedList){
 		cout << elem.first << ":";
 		vector<int>::iterator vi;
@@ -50,6 +57,8 @@ void CheckInvertedList(){
 		}
 		cout << endl;
 	}
+	*/
+	
 }
 
 
@@ -256,7 +265,24 @@ void GenNodeList(node *cur){
 	return;
 }
 void CheckNodeList(){
+
 	//map< int, map< pair<int, int>, vector<int> > > nodeList;
+	map< int, map< pair<int, int>, vector<int> > >::iterator mi;
+	float evaLen = 0;
+	float evaNodeLen = 0;
+	for (mi = nodeList.begin(); mi != nodeList.end(); ++mi){
+		evaLen += (*mi).second.size();
+		map< pair<int, int>, vector<int> >::iterator mii;
+		for (mii = (*mi).second.begin(); mii != (*mi).second.end(); ++mii){
+			evaNodeLen += (*mii).second.size();
+		}
+	}
+	evaNodeLen = (float)evaNodeLen / evaLen;
+	evaLen = (float)evaLen / nodeList.size();
+	cout << "nodeList平均包含nodes：" << evaLen << endl;
+	cout << "每个node平均包含records:" << evaNodeLen << endl;
+	/*
+	
 	map< int, map< pair<int, int>, vector<int> > >::iterator mi;
 	for (mi = nodeList.begin(); mi != nodeList.end(); ++mi){
 		cout << (*mi).first << "->{";
@@ -270,6 +296,7 @@ void CheckNodeList(){
 		}
 		cout << "}" << endl;
 	}
+	*/
 }
 
 
@@ -479,7 +506,7 @@ void GenUnfre(int n, int *ori, int left, int right){
 void GenRan(int n, int *ori, int left, int right){
 	
 	for (int i = 0; i < n;){
-		Gen2(0, ori, left, right, r2[i]);//已经按support由多到少排好序
+		Gen2(0, ori, left, right, r2[i]);//已经按标准（node-list或者support）排好序
 		vector<int> tempv;
 		for (int k = 0; k < 2; k++){
 			if (itemCount[r2[i][k]] >= baseFre){
@@ -817,17 +844,20 @@ int main(){
 
 	GenNodeList(root);
 	//cout << "GenNodeList Done----------" << endl;
-	SepFreUnfre(baseFre);
 	//CheckNodeList();
+
+	
 	//PrintFreNode();
 	//PrintUnfreNode();
+
+	SepFreUnfre(baseFre);
 	cout << "----------------------------------------------------------------" << endl;
 	cout << "当前数据集: " << path << endl << "frequent creterior: " << fre << endl;
 	cout << "当前数据集频繁项最低支持度：" << baseFre << endl;
 	cout << "频繁单项数量:" << fi << endl;
 	cout << "非频繁单项数量:" << ui << endl;
 	cout << "测试集大小:" << TESTNUM << endl;
-
+	
 	GenFre(TESTNUM, f, 0, fi);
 	GenUnfre(TESTNUM, u, 0, ui);
 	GenRan(TESTNUM, r, 0, ri);
@@ -1034,7 +1064,7 @@ int main(){
 	finish = clock();
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
 	cout << "nu6的运行时间为" << totaltime << "秒！" << endl;
-
+	
 	system("pause");
 	return 0;
 }
