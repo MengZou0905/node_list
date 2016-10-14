@@ -660,7 +660,7 @@ anl Combine2Unfre(anl a, anl b){
 	vector<int> inter;
 	bi = b.begin();
 	for (ai = a.begin(); ai != a.end();){
-		for (; bi != b.end() && (*ai).first.first < (*bi).first.first; ++ bi);
+		for (; bi != b.end() && (*ai).first.first > (*bi).first.first; ++ bi);
 		if (bi != b.end()){
 			if ((*ai).first.first == (*bi).first.first){//DLR相同
 				//交操作
@@ -670,7 +670,7 @@ anl Combine2Unfre(anl a, anl b){
 				++ai;
 			}
 			else{
-				if ((*ai).first.first > (*bi).first.first){
+				if ((*ai).first.first < (*bi).first.first){
 					++ai;
 				}
 			}
